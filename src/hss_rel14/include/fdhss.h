@@ -28,6 +28,7 @@
 #include "statshss.h"
 #include "soss.h"
 #include "logger.h"
+#include "dynamodb.h"
 
 #include "resthandler.h"
 
@@ -173,6 +174,7 @@ class FDHss {
   s6as6d::Application* gets6as6dApp() { return m_s6aapp; }
   s6c::Application* gets6cApp() { return m_s6capp; }
   DataAccess& getDb() { return m_dbobj; }
+  DynamoDb& getDdb() { return m_ddb; }
   WorkerManager& getWorkMgr() { return m_wrkmgr; }
   HSSWorkerQueue& getWorkerQueue() { return m_workerqueue; }
 
@@ -188,6 +190,7 @@ class FDHss {
   s6c::Application* m_s6capp;
   FDPeerList m_mme_peers;
   DataAccess m_dbobj;
+  DynamoDb m_ddb;
   Pistache::Http::Endpoint* m_endpoint;
   OssEndpoint<Logger>* m_ossendpoint;
   WorkerManager m_wrkmgr;

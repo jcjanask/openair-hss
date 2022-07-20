@@ -1,0 +1,39 @@
+../../build/hss_rel14/build/dataaccess.o: \
+ ../../src/hss_rel14/src/dataaccess.cpp \
+ ../../src/hss_rel14/include/dataaccess.h \
+ ../../src/hss_rel14/util/include/scassandra.h \
+ ../../src/hss_rel14/util/include/stime.h \
+ ../../src/hss_rel14/util/include/sutility.h \
+ ../../src/hss_rel14/util/include/serror.h \
+ ../../src/hss_rel14/include/common_def.h \
+ ../../src/hss_rel14/include/util.h ../../src/hss_rel14/include/logger.h \
+ ../../src/hss_rel14/util/include/slogger.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/spdlog.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/common.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/tweakme.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/details/null_mutex.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/fmt/fmt.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/fmt/bundled/format.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/logger.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/sinks/base_sink.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/sinks/../details/log_msg.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/sinks/../details/../details/os.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/sinks/../formatter.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/sinks/../details/pattern_formatter_impl.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/sinks/sink.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/details/logger_impl.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/details/spdlog_impl.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/details/../details/registry.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/details/../details/../async_logger.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/details/../details/../details/async_logger_impl.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/details/../details/../details/../details/async_log_helper.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/details/../details/../details/../details/../details/mpmc_blocking_q.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/details/../sinks/file_sinks.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/details/../sinks/../details/file_helper.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/details/../sinks/stdout_sinks.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/details/../sinks/syslog_sink.h \
+ ../../build/hss_rel14/../git_submodules/spdlog/include/spdlog/details/../sinks/ansicolor_sink.h \
+ ../../src/hss_rel14/include/options.h \
+ ../../src/hss_rel14/hsssec/include/hss_config.h \
+ ../../src/hss_rel14/hsssec/include/auc.h \
+ ../../src/hss_rel14/hsssec/include/aucpp.h

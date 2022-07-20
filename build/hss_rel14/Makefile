@@ -26,6 +26,8 @@ LIBS := \
  /usr/local/lib/libpistache.a \
  /usr/local/lib/libfdcore.so \
  /usr/local/lib/libfdproto.so \
+ ~/sdk/sdk_build/aws-cpp-sdk-core/libaws-cpp-sdk-core.so \
+ ~/sdk/sdk_build/aws-cpp-sdk-dynamodb/libaws-cpp-sdk-dynamodb.so \
  -L/usr/local/lib/x86_64-linux-gnu \
  -lcassandra \
  -lrt \
@@ -39,6 +41,7 @@ INCS := \
  -I $(OAI_MODULES_DIR)/../git_submodules/spdlog/include \
  -I /usr/local/include/freeDiameter \
  -I $(OAI_HSS_DIR)/hsssec/include \
+ -I /usr/local/include/aws/dynamodb \
  -I /usr/local/include
 
 $(TARGET): $(OBJECTS)

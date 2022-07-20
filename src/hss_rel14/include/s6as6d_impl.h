@@ -31,6 +31,7 @@ extern "C" {
 #define AUTH_MAX_EUTRAN_VECTORS 6
 
 class DataAccess;
+class DynamoDb;
 
 namespace s6t {
 class MonitoringEventConfigurationExtractorList;
@@ -50,6 +51,7 @@ class Application : public ApplicationBase {
 
  public:
   Application(DataAccess& dbobj);
+  Application(DataAccess& dbobj, DynamoDb& ddb);
   ~Application();
 
   UPLRcmd& getUPLRcmd() { return m_cmd_uplr; }
@@ -74,6 +76,7 @@ class Application : public ApplicationBase {
   bool sendRERreq(FDPeer& peer);
 
   DataAccess& dataaccess() { return m_dbobj; }
+  DynamoDb& dynamodb() { return m_ddb; }
 
  private:
   void registerHandlers();
@@ -99,6 +102,7 @@ class Application : public ApplicationBase {
   RERreq* createRERreq(FDPeer& peer);
 
   DataAccess& m_dbobj;
+  DynamoDb& m_ddb;
 };
 
 class IDRRreq : public INSDRreq {
@@ -200,8 +204,8 @@ class ULRProcessor : public QueueProcessor {
 
   void getEvents();
 
-  void getImsiInfo(SCassFuture& future);
-  void getExternalIds(SCassFuture& future);
+  void getImsiInfo();
+  void getExternalIds();
   void getEventIdsMsisdn(SCassFuture& future);
   void getEventIdsExternalIds(SCassFuture& future);
   void getEvents(SCassFuture& future);
@@ -217,12 +221,15 @@ class ULRProcessor : public QueueProcessor {
   long m_perf_timer;
   std::string m_imsi;
   DAImsiInfo m_orig_info;
+  DDBImsiInfo m_ddborig_info;
   DAImsiInfo m_new_info;
   uint32_t m_present_flags;
   uint8_t m_plmn_id[4];
   size_t m_plmn_len;
   DAExtIdList m_extIdLst;
+  DDBExtIdList m_ddbExtIdLst;
   DAEventIdList m_evtIdLst;
+  DDBEventIdList m_ddbEvtIdLst;
   DAEventList m_evtLst;
   unsigned long m_3count;
   bool m_3aSuccess;
@@ -302,7 +309,7 @@ class AIRProcessor : public QueueProcessor {
  private:
   static void on_air_callback(CassFuture* f, void* data);
 
-  void getImsiSec(SCassFuture& future);
+  void getImsiSec();
   void updateImsi(SCassFuture& future);
 
   s6as6d::AuthenticationInformationRequestExtractor m_air;
@@ -311,6 +318,8 @@ class AIRProcessor : public QueueProcessor {
   s6as6d::Application& m_app;
   s6as6d::Dictionary& m_dict;
   DAImsiSec m_sec;
+  DDBImsiSec m_ddbsec;
+  DDBImsiInfo m_ddbimsiinfo;
   std::string m_imsi;
   uint64_t m_uimsi;
   auc_vector_t m_vector[AUTH_MAX_EUTRAN_VECTORS];

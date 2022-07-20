@@ -37,6 +37,7 @@
 #include "options.h"
 #include "logger.h"
 #include "resthandler.h"
+#include "dynamodb.h"
 
 extern "C" {
 #include "hss_config.h"
@@ -119,6 +120,9 @@ void initHandler() {
 #include "util.h"
 
 int main(int argc, char** argv) {
+  DynamoDb().connect();
+  std::cout << DynamoDb().getMmeIdentityFromImsi("2") << std::endl;
+
   if (!Options::parse(argc, argv)) {
     std::cout << "Options::parse() failed" << std::endl;
     return 1;
@@ -129,7 +133,6 @@ int main(int argc, char** argv) {
 
   /////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////
-
   std::cout << "Options::jsonConfig            : " << Options::getjsonConfig()
             << std::endl;
   std::cout << "Options::diameterconfiguration : "
@@ -192,6 +195,8 @@ int main(int argc, char** argv) {
     return 0;
   }
 
+ 
+
 #ifdef MONITOR_PENDING_MESSAGE_LEVEL
   {
     struct sigevent sev;
@@ -216,6 +221,8 @@ int main(int argc, char** argv) {
   fdHss.shutdown();
 
   fdHss.waitForShutdown();
+
+  DynamoDb().disconnect();
 
   Logger::flush();
   Logger::cleanup();

@@ -29,6 +29,7 @@
 #include "rapidjson/document.h"
 #include "statshss.h"
 #include "util.h"
+#include "dynamodb.h"
 
 #include <iomanip>
 extern "C" {
@@ -139,21 +140,24 @@ void fdJsonError(const char* err) {
 }
 
 // Member functions that customize the individual application
-Application::Application(DataAccess& dbobj)
+Application::Application(DataAccess& dbobj, DynamoDb& ddb)
     : ApplicationBase(),
       m_cmd_uplr(*this)
       //, m_cmd_calr( *this )
       ,
-      m_cmd_auir(*this)
+      m_cmd_auir(*this),
       //, m_cmd_insdr( *this )
       //, m_cmd_desdr( *this )
-      ,
-      m_cmd_puur(*this)
+      
+      m_cmd_puur(*this),
       //, m_cmd_rer( *this )
-      ,
-      m_dbobj(dbobj) {
+      
+      m_dbobj(dbobj),
+      m_ddb(ddb) {
   registerHandlers();
 }
+
+
 
 Application::~Application() {}
 
@@ -779,13 +783,13 @@ int PUURcmd::process(FDMessageRequest* req) {
       }
     }
 
-    if (!m_app.dataaccess().getMmeIdentityFromImsi(imsi, mme_id)) {
+    if (!m_app.dynamodb().getMmeIdentityFromImsi(imsi)) {
       experimental = true;
       result_code  = DIAMETER_ERROR_USER_UNKNOWN;
       break;
     }
 
-    if (!m_app.dataaccess().purgeUE(imsi)) {
+    if (!m_app.dynamodb().purgeUe(imsi)) {
       experimental = true;
       result_code  = DIAMETER_ERROR_USER_UNKNOWN;
       break;
@@ -950,11 +954,11 @@ void ULRProcessor::on_ulr_callback(CassFuture* future, void* data) {
 
   switch (action->getAction()) {
     case ULRDB_GET_IMSI_INFO: {
-      action->getProcessor().getImsiInfo(f);
+      action->getProcessor().getImsiInfo();
       break;
     }
     case ULRDB_GET_EXT_IDS: {
-      action->getProcessor().getExternalIds(f);
+      action->getProcessor().getExternalIds();
       break;
     }
     case ULRDB_GET_EVNTIDS_MSISDN: {
@@ -1113,39 +1117,24 @@ void ULRProcessor::processNextPhase(ULRProcessor* pthis) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void ULRProcessor::getImsiInfo(SCassFuture& future) {
-  bool success = m_app.dataaccess().getImsiInfoData(future, m_orig_info);
+void ULRProcessor::getImsiInfo() {
+  bool success = m_app.dynamodb().getImsiInfo(m_imsi, m_ddborig_info);
   DB_OP_COMPLETE(ULRDB_GET_IMSI_INFO, m_dbexecuted, m_dbresult, success);
 }
 
-void ULRProcessor::getExternalIds(SCassFuture& future) {
-  bool success = m_app.dataaccess().getExtIdsFromImsiData(future, m_extIdLst);
+void ULRProcessor::getExternalIds() {
+  bool success = m_app.dynamodb().getExtIdsFromImsi(m_imsi, m_ddbExtIdLst);
   DB_OP_COMPLETE(ULRDB_GET_EXT_IDS, m_dbexecuted, m_dbresult, success);
 
-  if (success) {
-    bool first = true;
-    std::stringstream ss;
-
-    for (auto it = m_extIdLst.begin(); it != m_extIdLst.end(); ++it) {
-      if (first)
-        first = false;
-      else
-        ss << ",";
-      ss << "'" << *it << "'";
-    }
-
     atomic_inc_fetch(m_dbissued);
-    success = m_app.dataaccess().getEventIdsFromExtIds(
-        ss.str(), m_evtIdLst, on_ulr_callback,
-        new ULRDatabaseAction(ULRDB_GET_EVNTIDS_EXTIDS, *this));
+    success = m_app.dynamodb().getEventIdsFromImsi(
+        m_imsi, m_ddbEvtIdLst);
     if (!success) {
       DB_OP_COMPLETE(ULRDB_GET_EVNTIDS_EXTIDS, m_dbexecuted, m_dbresult, false);
       DB_OP_COMPLETE(ULRDB_GET_EVNTS_EVNTIDS, m_dbexecuted, m_dbresult, false);
       atomic_dec_fetch(m_dbissued);
       return;
-    }
-
-  } else {
+    } else {
     DB_OP_COMPLETE(ULRDB_GET_EVNTIDS_EXTIDS, m_dbexecuted, m_dbresult, success);
   }
 }
@@ -1322,15 +1311,13 @@ void ULRProcessor::phase1() {
 
   m_nextphase = ULRSTATE_PHASE2;
 
-  result = m_app.dataaccess().getImsiInfo(
-      m_new_info.imsi.c_str(), m_orig_info, on_ulr_callback,
-      new ULRDatabaseAction(ULRDB_GET_IMSI_INFO, *this));
+  result = m_app.dynamodb().getImsiInfo(
+      m_new_info.imsi.c_str(), m_ddborig_info);
 
-  if (result) {
+   if (result) {
     atomic_inc_fetch(m_dbissued);
-    result = m_app.dataaccess().getExtIdsFromImsi(
-        m_new_info.imsi.c_str(), m_extIdLst, on_ulr_callback,
-        new ULRDatabaseAction(ULRDB_GET_EXT_IDS, *this));
+    result = m_app.dynamodb().getExtIdsFromImsi(
+        m_new_info.imsi.c_str(), m_ddbExtIdLst);
     if (!result) {
       DB_OP_COMPLETE(ULRDB_GET_EXT_IDS, m_dbexecuted, m_dbresult, result);
       DB_OP_COMPLETE(
@@ -1344,9 +1331,8 @@ void ULRProcessor::phase1() {
 
   if (result) {
     atomic_inc_fetch(m_dbissued);
-    result = m_app.dataaccess().getEventIdsFromMsisdn(
-        m_new_info.msisdn, m_evtIdLst, on_ulr_callback,
-        new ULRDatabaseAction(ULRDB_GET_EVNTIDS_MSISDN, *this));
+    result = m_app.dynamodb().getEventIdsFromMsisdn(
+        m_new_info.msisdn, m_ddbEvtIdLst);
     if (!result) {
       DB_OP_COMPLETE(
           ULRDB_GET_EVNTIDS_MSISDN, m_dbexecuted, m_dbresult, result);
@@ -1357,9 +1343,8 @@ void ULRProcessor::phase1() {
 
   if (result) {
     atomic_inc_fetch(m_dbissued);
-    result = m_app.dataaccess().getMmeIdFromHost(
-        m_new_info.mmehost, m_mmeidentity, on_ulr_callback,
-        new ULRDatabaseAction(ULRDB_GET_MMEID_HOST, *this));
+    result = m_app.dynamodb().getMmeIdFromHost(
+        m_new_info.mmehost, m_mmeidentity);
     if (!result) {
       DB_OP_COMPLETE(ULRDB_GET_MMEID_HOST, m_dbexecuted, m_dbresult, result);
       atomic_dec_fetch(m_dbissued);
@@ -1599,14 +1584,14 @@ void ULRProcessor::phase2() {
 
 void ULRProcessor::phase3() {
   if (!FLAG_IS_SET(m_ulrflags, ULR_SKIP_SUBSCRIBER_DATA)) {
-    for (DAExtIdList::iterator it = m_extIdLst.begin(); it != m_extIdLst.end();
+    for (DDBExtIdList::iterator it = m_ddbExtIdLst.begin(); it != m_ddbExtIdLst.end();
          ++it) {
-      m_app.dataaccess().getEventIdsFromExtId(*it, m_evtIdLst);
+      m_app.dynamodb().getEventIdsFromExtId(*it, m_ddbEvtIdLst);
     }
 
     // get the events associated with the event id's
-    for (DAEventIdList::iterator it = m_evtIdLst.begin();
-         it != m_evtIdLst.end(); ++it) {
+    for (DDBEventIdList::iterator it = m_ddbEvtIdLst.begin();
+         it != m_ddbEvtIdLst.end(); ++it) {
       DAEvent* e = new DAEvent();
 
       if (m_app.dataaccess().getEvent((*it)->scef_id, (*it)->scef_ref_id, *e))
@@ -1791,7 +1776,7 @@ void AIRProcessor::on_air_callback(CassFuture* future, void* data) {
 
   switch (action->getAction()) {
     case AIRDB_GET_IMSI_SEC: {
-      action->getProcessor().getImsiSec(f);
+      action->getProcessor().getImsiSec();
       break;
     }
     case AIRDB_UPDATE_IMSI: {
@@ -1908,8 +1893,8 @@ void AIRProcessor::processNextPhase(AIRProcessor* pthis) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void AIRProcessor::getImsiSec(SCassFuture& future) {
-  bool success = m_app.dataaccess().getImsiSecData(future, m_sec);
+void AIRProcessor::getImsiSec() {
+  bool success = m_app.dynamodb().getImsiSecData(m_imsi, m_ddbsec);
   DB_OP_COMPLETE(AIRDB_GET_IMSI_SEC, m_dbexecuted, m_dbresult, success);
 }
 
@@ -2033,9 +2018,8 @@ void AIRProcessor::phase1() {
 
   m_nextphase = AIRSTATE_PHASE2;
 
-  if (m_app.dataaccess().getImsiSec(
-          m_imsi, m_sec, on_air_callback,
-          new AIRDatabaseAction(AIRDB_GET_IMSI_SEC, *this))) {
+  if (m_app.dynamodb().getImsiSecData(
+          m_imsi, m_ddbsec)) {
     atomic_inc_fetch(m_dbissued);
   } else {
     FDAvp er(m_dict.avpExperimentalResult());
@@ -2067,7 +2051,7 @@ void AIRProcessor::phase2() {
   }
 
   if (m_auts_set) {
-    uint8_t* sqn = sqn_ms_derive_cpp(m_sec.opc, m_sec.key, m_auts, m_sec.rand);
+    uint8_t* sqn = sqn_ms_derive_cpp(m_ddbsec.opc, m_ddbsec.key, m_auts, m_ddbsec.rand);
     if (sqn != NULL) {
       // We succeeded to verify SQN_MS...
       // Pick a new RAND and store SQN_MS + RAND in the HSS
@@ -2081,7 +2065,7 @@ void AIRProcessor::phase2() {
       SqnU64Union eu;
       SQN_TO_U64(sqn, eu);
       eu.u64 += 32;
-      U64_TO_SQN(eu, m_sec.sqn);
+      U64_TO_SQN(eu, m_ddbsec.sqn);
       free(sqn);
     } else {
       std::cerr << "Could not resync " << m_uimsi << std::endl;
@@ -2091,7 +2075,7 @@ void AIRProcessor::phase2() {
   for (uint32_t i = 0; i < m_num_vectors; i++) {
     generate_random_cpp(m_vector[i].rand, RAND_LENGTH);
     generate_vector_cpp(
-        m_sec.opc, m_uimsi, m_sec.key, m_plmn_id, m_sec.sqn, &m_vector[i]);
+        m_ddbsec.opc, m_uimsi, m_ddbsec.key, m_plmn_id, m_ddbsec.sqn, &m_vector[i]);
   }
 
   memcpy(m_sec.rand, m_vector[0].rand, sizeof(m_sec.rand));
@@ -2121,9 +2105,8 @@ void AIRProcessor::phase2() {
   m_nextphase = AIRSTATE_PHASE3;
 
   // combine the rand and sqn updates into a single database update
-  if (m_app.dataaccess().updateRandSqn(
-          m_imsi, m_vector[m_num_vectors - 1].rand, m_sec.sqn, true,
-          on_air_callback, new AIRDatabaseAction(AIRDB_UPDATE_IMSI, *this))) {
+  if (m_app.dynamodb().updateRandSqn(
+          m_imsi, m_vector[m_num_vectors - 1].rand, m_ddbsec.sqn, true)) {
     atomic_inc_fetch(m_dbissued);
   } else {
     m_nextphase = AIRSTATE_PHASEFINAL;

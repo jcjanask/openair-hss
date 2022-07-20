@@ -180,7 +180,7 @@ if(GIT_FOUND)
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
 endif()
-
+find_package(AWSSDK REQUIRED COMPONENTS dynamodb)
 
 add_list_string_option(PACKAGE_NAME "NotDefined" "As per attribute name")
 add_definitions("-DPACKAGE_VERSION=\"Branch: ${GIT_BRANCH} Abrev. Hash: ${GIT_COMMIT_HASH} Date: ${GIT_COMMIT_DATE}\"")
