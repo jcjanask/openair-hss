@@ -38,6 +38,13 @@
 #include "logger.h"
 #include "resthandler.h"
 #include "dynamodb.h"
+#include "s6as6d_impl.h"
+#include "s6as6d.h"
+#include "fd.h"
+#include "freeDiameter/freeDiameter-host.h"
+#include "freeDiameter/libfdcore.h"
+#include "freeDiameter/libfdproto.h"
+
 
 extern "C" {
 #include "hss_config.h"
@@ -120,8 +127,8 @@ void initHandler() {
 #include "util.h"
 
 int main(int argc, char** argv) {
-  DynamoDb().connect();
-  std::cout << DynamoDb().getMmeIdentityFromImsi("2") << std::endl;
+
+  Options::help();
 
   if (!Options::parse(argc, argv)) {
     std::cout << "Options::parse() failed" << std::endl;

@@ -90,6 +90,10 @@
  ../../src/hss_rel14/include/logger.h \
  ../../src/hss_rel14/include/resthandler.h \
  ../../src/hss_rel14/include/dynamodb.h \
+ ../../src/hss_rel14/include/s6as6d_impl.h \
+ ../../src/hss_rel14/include/s6as6d.h ../../src/hss_rel14/include/fdhss.h \
+ ../../src/hss_rel14/hsssec/include/access_restriction.h \
  ../../src/hss_rel14/hsssec/include/aucpp.h \
+ ../../src/hss_rel14/include/s6as6d.h \
  ../../src/hss_rel14/hsssec/include/auc.h \
  ../../src/hss_rel14/hsssec/include/aucpp.h

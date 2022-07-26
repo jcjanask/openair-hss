@@ -16,4 +16,7 @@
 [submodule "build/git_submodules/pistache"]
         path = build/git_submodules/pistache
         url = https://github.com/oktal/pistache.git
+# [submodule "build/git_submodules/sdk"]
+#         path = build/git_submodules/sdk
+#         url = https://github.com/aws/aws-sdk-cpp.git
 

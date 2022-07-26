@@ -37,6 +37,10 @@ set(OPENAIR_CMAKE_SCRIPTS ${OPENAIRCN_DIR}/build/tools)
 set(OAI_HSS_DIR           ${OPENAIRCN_DIR}/src/hss_rel14)
 set(OAI_HSS_UTIL_DIR           ${OPENAIRCN_DIR}/src/hss_rel14/util)
 set(OPENAIR_BIN_DIR       ${OPENAIRCN_DIR}/src/hss_rel14/)
+set(AWS_CPP_SDK_INCLUDE_DDB_DIRS ${OPENAIRCN_DIR}/sdk/dynamodb CACHE STRING "aws-cpp-sdk include directories")
+set(AWS_CPP_SDK_INCLUDE_SDK_DIRS ${OPENAIRCN_DIR}/sdk/core CACHE STRING "aws-cpp-sdk include directories")
+set(AWS_CPP_SDK_CORE_LIB   ${OPENAIRCN_DIR}/sdk/sdk_build/aws-cpp-sdk-core CACHE STRING "aws-cpp-sdk link core lib")
+set(AWS_CPP_SDK_DDB_LIB  ${OPENAIRCN_DIR}/sdk/sdk_build/aws-cpp-sdk-dynamodb CACHE STRING "aws-cpp-sdk link DDB lib")
 
 
 set(CMAKE_MODULE_PATH "${OPENAIRCN_DIR}/build/cmake_modules" "${CMAKE_MODULE_PATH}")
@@ -137,9 +141,10 @@ add_definitions("-DPACKAGE_BUGREPORT=\"openaircn-user@lists.eurecom.fr\"")
 link_directories(${OAI_HSS_DIR}/util)
 link_directories(${OAI_HSS_DIR}/hsssec)
 
-include_directories( ${OAI_HSS_DIR}/../git_submodules/rapidjson/include ${OAI_HSS_DIR}/util/include ${OAI_HSS_DIR}/include /usr/local/include/freeDiameter ${OAI_HSS_DIR}/hsssec/include /usr/local/include ${OAI_HSS_DIR}/../git_submodules/cpp-driver/include ${OAI_HSS_DIR}/../git_submodules/spdlog/include)
-ADD_EXECUTABLE(oai_hss  ${OAI_HSS_DIR}/src/main.cpp)
-target_link_libraries (oai_hss
+include_directories( ${OAI_HSS_DIR}/../git_submodules/rapidjson/include ${OAI_HSS_DIR}/util/include ${OAI_HSS_DIR}/include /usr/local/include/freeDiameter ${OAI_HSS_DIR}/hsssec/include /usr/local/include ${OAI_HSS_DIR}/../git_submodules/cpp-driver/include ${OAI_HSS_DIR}/../git_submodules/spdlog/include
+${AWS_CPP_SDK_INCLUDE_DDB_DIRS} ${AWS_CPP_SDK_INCLUDE_SDK_DIRS})
+ADD_EXECUTABLE(oai_hsss  ${OAI_HSS_DIR}/src/main.cpp)
+target_link_libraries (oai_hsss
                        -Wl,-whole-archive
                        hss_modules
                        -Wl,-no-whole-archive
@@ -151,6 +156,8 @@ target_link_libraries (oai_hss
                        ${FREEDIAMETER_LIBRARIES}
                        ${CONFIG_LIBRARIES}
                        ${CMAKE_THREAD_LIBS_INIT}
+                       ${AWS_CPP_SDK_DDB_LIB}
+                       ${AWS_CPP_SDK_CORE_LIB}
                        gnutls)
 
 # Default parameters

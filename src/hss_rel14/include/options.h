@@ -76,7 +76,7 @@ class Options {
   static const std::string& getsynchauts() { return m_synchauts; }
   static const int& getnumworkers() { return m_numworkers; }
   static const int& getconcurrent() { return m_concurrent; }
-
+  static void help();
   static void fillhssconfig(hss_config_t* hss_config_p);
 
   // static const std::string &setsynchauts(const std::string &auts) { return
@@ -115,7 +115,7 @@ class Options {
     roamallow             = 0x10000000
   };
 
-  static void help();
+  
 
   static const int JSONFILEBUFFER;
   static int options;

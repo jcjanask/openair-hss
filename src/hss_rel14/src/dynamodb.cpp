@@ -92,7 +92,7 @@ bool DynamoDb::purgeUe(std::string imsi) {
             std::cout << result.GetError().GetMessage() << std::endl;
             return 0;
         } else {
-            std::cout << "Item was updated" << std::endl;
+            std::cout << "Item was updated." << std::endl;
             return 1;
         }
     return 0;

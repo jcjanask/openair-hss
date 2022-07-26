@@ -18,7 +18,7 @@ SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 DEPENDS := $(OBJECTS:%.o=%.d)
 COPT_FLAGS := -g
-CFLAGS := $(COPT_FLAGS) -pthread -std=c++11 # -Wall
+CFLAGS := $(COPT_FLAGS) -pthread -ggdb -std=c++11 # -Wall
 LFLAGS := $(COPT_FLAGS) -pthread -lpthread -Wl,-rpath,/usr/local/lib/x86_64-linux-gnu:/usr/local/lib
 LIBS := \
  $(OAI_HSS_BUILD_DIR)/util/lib/libc3po.a \
@@ -26,8 +26,8 @@ LIBS := \
  /usr/local/lib/libpistache.a \
  /usr/local/lib/libfdcore.so \
  /usr/local/lib/libfdproto.so \
- ~/sdk/sdk_build/aws-cpp-sdk-core/libaws-cpp-sdk-core.so \
- ~/sdk/sdk_build/aws-cpp-sdk-dynamodb/libaws-cpp-sdk-dynamodb.so \
+ /usr/local/lib/libaws-cpp-sdk-core.so \
+ /usr/local/lib//libaws-cpp-sdk-dynamodb.so \
  -L/usr/local/lib/x86_64-linux-gnu \
  -lcassandra \
  -lrt \
@@ -41,7 +41,8 @@ INCS := \
  -I $(OAI_MODULES_DIR)/../git_submodules/spdlog/include \
  -I /usr/local/include/freeDiameter \
  -I $(OAI_HSS_DIR)/hsssec/include \
- -I /usr/local/include/aws/dynamodb \
+ -I /usr/local/include/dynamodb \
+ -I /usr/local/include/core \
  -I /usr/local/include
 
 $(TARGET): $(OBJECTS)

@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../../../lib/libaws-c-event-stream.a CMakeFiles/aws-c-event-stream.dir/source/event_stream.c.o CMakeFiles/aws-c-event-stream.dir/source/event_stream_channel_handler.c.o CMakeFiles/aws-c-event-stream.dir/source/event_stream_rpc.c.o CMakeFiles/aws-c-event-stream.dir/source/event_stream_rpc_client.c.o CMakeFiles/aws-c-event-stream.dir/source/event_stream_rpc_server.c.o
+/usr/bin/ranlib ../../../../lib/libaws-c-event-stream.a

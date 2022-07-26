@@ -1,0 +1,2 @@
+/usr/bin/ar qc libaws-checksums.a CMakeFiles/aws-checksums.dir/source/crc.c.o CMakeFiles/aws-checksums.dir/source/crc_sw.c.o CMakeFiles/aws-checksums.dir/source/intel/asm/crc32c_sse42_asm.c.o
+/usr/bin/ranlib libaws-checksums.a

@@ -1,0 +1,2 @@
+/usr/bin/ar qc libaws-c-sdkutils.a CMakeFiles/aws-c-sdkutils.dir/source/aws_profile.c.o CMakeFiles/aws-c-sdkutils.dir/source/resource_name.c.o CMakeFiles/aws-c-sdkutils.dir/source/sdkutils.c.o
+/usr/bin/ranlib libaws-c-sdkutils.a

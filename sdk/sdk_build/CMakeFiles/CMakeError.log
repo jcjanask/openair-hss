@@ -1,0 +1,214 @@
+Performing C++ SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_acb4b/fast && /usr/bin/make  -f CMakeFiles/cmTC_acb4b.dir/build.make CMakeFiles/cmTC_acb4b.dir/build
+make[1]: Entering directory '/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_acb4b.dir/src.cxx.o
+/usr/bin/c++ -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_acb4b.dir/src.cxx.o -c /home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_acb4b
+/snap/cmake/930/bin/cmake -E cmake_link_script CMakeFiles/cmTC_acb4b.dir/link.txt --verbose=1
+/usr/bin/c++ -rdynamic CMakeFiles/cmTC_acb4b.dir/src.cxx.o -o cmTC_acb4b 
+CMakeFiles/cmTC_acb4b.dir/src.cxx.o: In function `main':
+src.cxx:(.text+0x3e): undefined reference to `pthread_create'
+src.cxx:(.text+0x4a): undefined reference to `pthread_detach'
+src.cxx:(.text+0x56): undefined reference to `pthread_cancel'
+src.cxx:(.text+0x67): undefined reference to `pthread_join'
+src.cxx:(.text+0x7b): undefined reference to `pthread_atfork'
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_acb4b.dir/build.make:98: recipe for target 'cmTC_acb4b' failed
+make[1]: *** [cmTC_acb4b] Error 1
+make[1]: Leaving directory '/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp'
+Makefile:127: recipe for target 'cmTC_acb4b/fast' failed
+make: *** [cmTC_acb4b/fast] Error 2
+
+
+Source file was:
+#include <pthread.h>
+
+static void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_cancel(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Performing C SOURCE FILE Test AWS_HAVE_MSVC_MULX failed with the following compile output:
+Change Dir: /home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_880b3/fast && /usr/bin/make  -f CMakeFiles/cmTC_880b3.dir/build.make CMakeFiles/cmTC_880b3.dir/build
+make[1]: Entering directory '/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_880b3.dir/src.c.o
+/usr/bin/cc -DAWS_HAVE_MSVC_MULX   -o CMakeFiles/cmTC_880b3.dir/src.c.o -c /home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp/src.c
+/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp/src.c: In function ‘main’:
+/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp/src.c:4:9: warning: implicit declaration of function ‘_mulx_u32’; did you mean ‘__mulxc3’? [-Wimplicit-function-declaration]
+         _mulx_u32(1, 2, &foo);
+         ^~~~~~~~~
+         __mulxc3
+Linking C executable cmTC_880b3
+/snap/cmake/930/bin/cmake -E cmake_link_script CMakeFiles/cmTC_880b3.dir/link.txt --verbose=1
+/usr/bin/cc -rdynamic CMakeFiles/cmTC_880b3.dir/src.c.o -o cmTC_880b3 
+CMakeFiles/cmTC_880b3.dir/src.c.o: In function `main':
+src.c:(.text+0x35): undefined reference to `_mulx_u32'
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_880b3.dir/build.make:98: recipe for target 'cmTC_880b3' failed
+make[1]: *** [cmTC_880b3] Error 1
+make[1]: Leaving directory '/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp'
+Makefile:127: recipe for target 'cmTC_880b3/fast' failed
+make: *** [cmTC_880b3/fast] Error 2
+
+
+...and run output:
+
+Return value: 1
+Source file was:
+
+        int main() {
+        int foo = 42;
+        _mulx_u32(1, 2, &foo);
+        return foo != 2;
+        }
+Performing C SOURCE FILE Test AWS_HAVE_WINAPI_DESKTOP failed with the following output:
+Change Dir: /home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_bd09d/fast && /usr/bin/make  -f CMakeFiles/cmTC_bd09d.dir/build.make CMakeFiles/cmTC_bd09d.dir/build
+make[1]: Entering directory '/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_bd09d.dir/src.c.o
+/usr/bin/cc -DAWS_HAVE_WINAPI_DESKTOP   -o CMakeFiles/cmTC_bd09d.dir/src.c.o -c /home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp/src.c
+/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp/src.c:2:14: fatal error: Windows.h: No such file or directory
+     #include <Windows.h>
+              ^~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_bd09d.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_bd09d.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_bd09d.dir/src.c.o] Error 1
+make[1]: Leaving directory '/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp'
+Makefile:127: recipe for target 'cmTC_bd09d/fast' failed
+make: *** [cmTC_bd09d/fast] Error 2
+
+
+Source file was:
+
+    #include <Windows.h>
+    #if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+    int main() {
+        return 0;
+    }
+    #else
+    it's not windows desktop
+    #endif
+
+Performing C SOURCE FILE Test AWS_ARCH_ARM64 failed with the following output:
+Change Dir: /home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_425bf/fast && /usr/bin/make  -f CMakeFiles/cmTC_425bf.dir/build.make CMakeFiles/cmTC_425bf.dir/build
+make[1]: Entering directory '/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_425bf.dir/src.c.o
+/usr/bin/cc -DAWS_ARCH_ARM64   -o CMakeFiles/cmTC_425bf.dir/src.c.o -c /home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp/src.c
+/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp/src.c: In function ‘main’:
+/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp/src.c:4:6: error: #error "not arm64"
+ #    error "not arm64"
+      ^~~~~
+CMakeFiles/cmTC_425bf.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_425bf.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_425bf.dir/src.c.o] Error 1
+make[1]: Leaving directory '/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp'
+Makefile:127: recipe for target 'cmTC_425bf/fast' failed
+make: *** [cmTC_425bf/fast] Error 2
+
+
+Source file was:
+
+    int main() {
+#if !(defined(__aarch64__) || defined(_M_ARM64))
+#    error "not arm64"
+#endif
+        return 0;
+    }
+
+Performing C SOURCE FILE Test AWS_ARCH_ARM32 failed with the following output:
+Change Dir: /home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_bd280/fast && /usr/bin/make  -f CMakeFiles/cmTC_bd280.dir/build.make CMakeFiles/cmTC_bd280.dir/build
+make[1]: Entering directory '/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_bd280.dir/src.c.o
+/usr/bin/cc -DAWS_ARCH_ARM32   -o CMakeFiles/cmTC_bd280.dir/src.c.o -c /home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp/src.c
+/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp/src.c: In function ‘main’:
+/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp/src.c:4:6: error: #error "not arm"
+ #    error "not arm"
+      ^~~~~
+CMakeFiles/cmTC_bd280.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_bd280.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_bd280.dir/src.c.o] Error 1
+make[1]: Leaving directory '/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp'
+Makefile:127: recipe for target 'cmTC_bd280/fast' failed
+make: *** [cmTC_bd280/fast] Error 2
+
+
+Source file was:
+
+    int main() {
+#if !(defined(__arm__) || defined(_M_ARM))
+#    error "not arm"
+#endif
+        return 0;
+    }
+
+Performing C SOURCE FILE Test HAS_MOUTLINE_ATOMICS failed with the following output:
+Change Dir: /home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_aa5c9/fast && /usr/bin/make  -f CMakeFiles/cmTC_aa5c9.dir/build.make CMakeFiles/cmTC_aa5c9.dir/build
+make[1]: Entering directory '/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_aa5c9.dir/src.c.o
+/usr/bin/cc -DHAS_MOUTLINE_ATOMICS  -moutline-atomics -Werror -o CMakeFiles/cmTC_aa5c9.dir/src.c.o -c /home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp/src.c
+cc: error: unrecognized command line option '-moutline-atomics'; did you mean '-finline-atomics'?
+CMakeFiles/cmTC_aa5c9.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_aa5c9.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_aa5c9.dir/src.c.o] Error 1
+make[1]: Leaving directory '/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp'
+Makefile:127: recipe for target 'cmTC_aa5c9/fast' failed
+make: *** [cmTC_aa5c9/fast] Error 2
+
+
+Source file was:
+int main(void) { return 0; }
+Performing C SOURCE FILE Test HAS_WGNU failed with the following output:
+Change Dir: /home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_d7e4e/fast && /usr/bin/make  -f CMakeFiles/cmTC_d7e4e.dir/build.make CMakeFiles/cmTC_d7e4e.dir/build
+make[1]: Entering directory '/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_d7e4e.dir/src.c.o
+/usr/bin/cc -DHAS_WGNU  -Wgnu -Werror -o CMakeFiles/cmTC_d7e4e.dir/src.c.o -c /home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp/src.c
+cc: error: unrecognized command line option '-Wgnu'
+CMakeFiles/cmTC_d7e4e.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_d7e4e.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_d7e4e.dir/src.c.o] Error 1
+make[1]: Leaving directory '/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp'
+Makefile:127: recipe for target 'cmTC_d7e4e/fast' failed
+make: *** [cmTC_d7e4e/fast] Error 2
+
+
+Source file was:
+int main(void) { return 0; }
+Performing C SOURCE FILE Test HAS_SANITIZERS failed with the following output:
+Change Dir: /home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_f15ae/fast && /usr/bin/make  -f CMakeFiles/cmTC_f15ae.dir/build.make CMakeFiles/cmTC_f15ae.dir/build
+make[1]: Entering directory '/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_f15ae.dir/src.c.o
+/usr/bin/cc -DHAS_SANITIZERS  -fsanitize= -o CMakeFiles/cmTC_f15ae.dir/src.c.o -c /home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp/src.c
+cc: error: missing argument to '-fsanitize='
+CMakeFiles/cmTC_f15ae.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_f15ae.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_f15ae.dir/src.c.o] Error 1
+make[1]: Leaving directory '/home/ubuntu/sdk/sdk_build/CMakeFiles/CMakeTmp'
+Makefile:127: recipe for target 'cmTC_f15ae/fast' failed
+make: *** [cmTC_f15ae/fast] Error 2
+
+
+Source file was:
+int main(void) { return 0; }

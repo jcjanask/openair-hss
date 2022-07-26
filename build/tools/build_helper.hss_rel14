@@ -52,6 +52,17 @@ build_freeDiameter()
   return $?
 }
 
+
+build_sdk() {
+cd /openair-hss/sdk
+git clone --recurse-submodules https://github.com/aws/aws-sdk-cpp.git
+mkdir build
+cd build
+cmake ../aws-sdk-cpp -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=/usr/local/ -DCMAKE_INSTALL_PREFIX=/usr/local/ -DBUILD_ONLY="dynamodb"
+make
+make install
+}
+
 #-------------------------------------------------------------------------------
 build_c_ares()
 {
@@ -119,7 +130,7 @@ build_libuv()
     echo "-- Starting libuv Build --"
     rm -rf /tmp/libuv
     git clone --depth=1 --branch=v1.23.1 https://github.com/libuv/libuv.git /tmp/libuv
-    cd /tmp/libuv
+    cd /tmp/libuvop
     mkdir -p build
     cd build
     $CMAKE ..
@@ -205,7 +216,7 @@ init_submodules()
 
   set_openair_env
   dir=$OPENAIRCN_DIR/build/hss_rel14
- 
+  build_sdk
   build_freeDiameter
   ret=$?;[[ $ret -ne 0 ]] && return $ret
   build_c_ares
@@ -306,7 +317,7 @@ check_install_hss_software() {
 	    specific_packages="libgnutls28-dev libgcrypt20-dev "
 	    ;;
 	"ubuntu17.04" | "ubuntu17.10" | "ubuntu18.04")
-	    specific_packages="libgnutls28-dev libgcrypt-dev python-cassandra python-blist"
+	    specific_packages="libgnutls28-dev libcurl4-openssl-dev libssl-dev uuid-dev zlib1g-dev libpulse-dev libgcrypt-dev python-cassandra python-blist"
 	    ;;
 	"ubuntu14.04" | "ubuntu16.04")
 	    specific_packages="libgnutls-dev libgcrypt-dev python-cassandra python-blist"

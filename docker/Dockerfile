@@ -20,6 +20,7 @@
 #   Valid for Ubuntu-18.04 (bionic)
 #
 #---------------------------------------------------------------------
+
 #---------------------------------------------------------------------
 # BUILDER IMAGE
 #---------------------------------------------------------------------
@@ -34,39 +35,7 @@ RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get upgrade --yes && \
     DEBIAN_FRONTEND=noninteractive apt-get install --yes \
       psmisc \
-      git && \
-    rm -rf /var/lib/apt/lists/*
-# Some GIT configuration command quite useful
-RUN /bin/bash -c "if [[ -v EURECOM_PROXY ]]; then git config --global http.proxy $EURECOM_PROXY; fi" && \
-    git config --global https.postBuffer 123289600 && \
-    git config --global http.sslverify false
-
-# wait for it
-workdir /
-RUN git clone https://github.com/vishnubob/wait-for-it.git
-
-
-# Copy the workspace as is
-WORKDIR /openair-hss
-COPY . .
-
-
-# Installing and Building HSS
-WORKDIR /openair-hss/scripts
-RUN ./build_hss_rel14 --check-installed-software --force
-RUN ./build_hss_rel14 --clean --build-type Release && \
-    mv /openair-hss/build/hss_rel14/bin/hss /openair-hss/build/hss_rel14/bin/oai_hss
-
-#---------------------------------------------------------------------
-# TARGET IMAGE
-#---------------------------------------------------------------------
-FROM ubuntu:bionic as oai-hss
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=Europe/Paris
-# We install some debug tools for the moment in addition of mandatory libraries
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get upgrade --yes && \
-    DEBIAN_FRONTEND=noninteractive apt-get install --yes \
+      git \
       tzdata \
       psmisc \
       openssl \
@@ -79,43 +48,41 @@ RUN apt-get update && \
       python \
       python3 \
       python-cassandra \
+      libcurl4-openssl-dev \
+      libssl-dev \
+      uuid-dev \
+      zlib1g-dev \
+      libpulse-dev \
+      cmake \
+      git \
       python3-cassandra && \
     rm -rf /var/lib/apt/lists/*
 
-# Copying executable and generated libraries
-WORKDIR /openair-hss/bin
-COPY --from=oai-hss-builder \
-    /openair-hss/build/hss_rel14/bin/oai_hss \
-    /openair-hss/scripts/entrypoint.sh \
-    ./
+# Some GIT configuration command quite useful
+RUN /bin/bash -c "if [[ -v EURECOM_PROXY ]]; then git config --global http.proxy $EURECOM_PROXY; fi" && \
+    git config --global https.postBuffer 123289600 && \
+    git config --global http.sslverify false
 
-COPY --from=oai-hss-builder \
-    /usr/local/lib/libfd* \
-    /usr/local/lib/x86_64-linux-gnu/libcassandra* \
-    /usr/local/lib/
-COPY --from=oai-hss-builder /usr/local/lib/freeDiameter/* /usr/local/lib/freeDiameter/
 
-# Copying template configuration files
-# The configuration folder will be flat
+
+# Copy the workspace as is
+WORKDIR /openair-hss
+COPY . .
+
+
+# Installing and Building HSS
+WORKDIR /openair-hss/scripts
+RUN git clone https://github.com/vishnubob/wait-for-it.git
+RUN ./build_hss_rel14 --check-installed-software --force
+RUN ./build_hss_rel14 --clean --build-type Release && \
+    mv /openair-hss/build/hss_rel14/bin/hss /openair-hss/build/hss_rel14/bin/oai_hss && \
+    mv /openair-hss/src/hss_rel14/bin/make_certs.sh /openair-hss/scripts/
+
 WORKDIR /openair-hss/etc
-COPY --from=oai-hss-builder \
-    /openair-hss/etc/hss_rel14.conf \
-    /openair-hss/etc/hss_rel14.json \
-    /openair-hss/etc/acl.conf \
-    /openair-hss/etc/oss.json \
-    /openair-hss/etc/hss_rel14_fd.conf \
-    ./
 RUN sed -i -e 's#freeDiameter##' hss_rel14.json && \
     sed -i -e "s#@PREFIX@/freeDiameter#@PREFIX@#g" hss_rel14_fd.conf
 
-# Copy the certificate generation script
 WORKDIR /openair-hss/scripts
-COPY --from=oai-hss-builder \
-    /openair-hss/src/hss_rel14/bin/make_certs.sh \
-    /openair-hss/scripts/data_provisioning_users \
-    /openair-hss/scripts/data_provisioning_mme \
-    /wait-for-it/wait-for-it.sh \
-    ./
 RUN sed -i -e "s@/freeDiameter@@" make_certs.sh
 
 WORKDIR /openair-hss
@@ -124,5 +91,87 @@ RUN openssl rand -out /root/.rnd 128
 # expose ports configured in hss_fd.conf
 EXPOSE 9042/tcp 5868/tcp 9080/tcp 9081/tcp
 
-CMD ["/openair-hss/bin/oai_hss", "-j", "/openair-hss/etc/hss_rel14.json", "--reloadkey", "true"]
-ENTRYPOINT ["/openair-hss/bin/entrypoint.sh"]
+CMD ["/openair-hss/build/hss_rel14/bin/oai_hss", "-j", "/openair-hss/etc/hss_rel14.json", "--reloadkey", "true"]
+ENTRYPOINT ["/openair-hss/scripts/entrypoint.sh"]
+# #---------------------------------------------------------------------
+# # TARGET IMAGE
+# #---------------------------------------------------------------------
+# FROM ubuntu:bionic as oai-hss
+# ENV DEBIAN_FRONTEND=noninteractive
+# ENV TZ=Europe/Paris
+
+
+# # We install some debug tools for the moment in addition of mandatory libraries
+# RUN apt-get update && \
+#     DEBIAN_FRONTEND=noninteractive apt-get upgrade --yes && \
+#     DEBIAN_FRONTEND=noninteractive apt-get install --yes \
+    #   tzdata \
+    #   psmisc \
+    #   openssl \
+    #   net-tools \
+    #   tshark \
+    #   libsctp1 \
+    #   libuv1 \
+    #   libconfig9 \
+    #   libidn11 \
+    #   python \
+    #   python3 \
+    #   python-cassandra \
+    #   libcurl4-openssl-dev \
+    #   libssl-dev \
+    #   uuid-dev \
+    #   zlib1g-dev \
+    #   libpulse-dev \
+    #   cmake \
+    #   git \
+    #   python3-cassandra && \
+    # rm -rf /var/lib/apt/lists/*
+
+    
+# # Copying executable and generated libraries
+# WORKDIR /openair-hss/bin
+# COPY --from=oai-hss-builder \
+#     /openair-hss/build/hss_rel14/bin/oai_hss \
+#     /openair-hss/scripts/entrypoint.sh \
+#     ./
+
+# COPY --from=oai-hss-builder \
+#     /usr/local/lib/libfd* \
+#     /usr/local/lib/x86_64-linux-gnu/libcassandra* \
+
+#     /usr/local/lib/
+# COPY --from=oai-hss-builder /usr/local/lib/freeDiameter/* /usr/local/lib/freeDiameter/
+
+# # Copying template configuration files
+# # The configuration folder will be flat
+# WORKDIR /openair-hss/etc
+# COPY --from=oai-hss-builder \
+#     /openair-hss/etc/hss_rel14.conf \
+#     /openair-hss/etc/hss_rel14.json \
+#     /openair-hss/etc/acl.conf \
+#     /openair-hss/etc/oss.json \
+#     /openair-hss/etc/hss_rel14_fd.conf \
+#     ./
+# RUN sed -i -e 's#freeDiameter##' hss_rel14.json && \
+#     sed -i -e "s#@PREFIX@/freeDiameter#@PREFIX@#g" hss_rel14_fd.conf
+
+# # Copy the certificate generation script
+# WORKDIR /openair-hss/scripts
+# COPY --from=oai-hss-builder \
+#     /openair-hss/src/hss_rel14/bin/make_certs.sh \
+#     /openair-hss/scripts/data_provisioning_users \
+#     /openair-hss/scripts/data_provisioning_mme \
+#     /wait-for-it/wait-for-it.sh \
+#     ./
+# RUN sed -i -e "s@/freeDiameter@@" make_certs.sh
+
+
+
+# WORKDIR /openair-hss
+# RUN openssl rand -out /root/.rnd 128
+
+# # expose ports configured in hss_fd.conf
+# EXPOSE 9042/tcp 5868/tcp 9080/tcp 9081/tcp
+
+# CMD ["/openair-hss/bin/oai_hss", "-j", "/openair-hss/etc/hss_rel14.json", "--reloadkey", "true"]
+# ENTRYPOINT ["/openair-hss/bin/entrypoint.sh"]
