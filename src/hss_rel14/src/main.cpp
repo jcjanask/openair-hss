@@ -44,6 +44,7 @@
 #include "freeDiameter/freeDiameter-host.h"
 #include "freeDiameter/libfdcore.h"
 #include "freeDiameter/libfdproto.h"
+#include "provisionusers.h"
 
 
 extern "C" {
@@ -127,8 +128,6 @@ void initHandler() {
 #include "util.h"
 
 int main(int argc, char** argv) {
-
-  Options::help();
 
   if (!Options::parse(argc, argv)) {
     std::cout << "Options::parse() failed" << std::endl;

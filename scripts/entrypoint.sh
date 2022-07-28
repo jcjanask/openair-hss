@@ -47,6 +47,8 @@ pushd /openair-hss/scripts
 ./wait-for-it/wait-for-it.sh  ${cassandra_Server_IP}:9042
 ./data_provisioning_users --ue-ambr-max-requested-bandwidth-ul ${UE_AMBR_UL} --ue-ambr-max-requested-bandwidth-dl ${UE_AMBR_DL} --apn ${APN1} --apn1-ambr-max-requested-bandwidth-dl ${APN1_AMBR_DL} --apn1-ambr-max-requested-bandwidth-ul ${APN1_AMBR_UL} --apn2 ${APN2} --key ${LTE_K} --imsi-first ${FIRST_IMSI} --msisdn-first 00000001 --mme-identity oai-mme.${REALM} --no-of-users ${NB_USERS} --realm ${REALM} --truncate False --verbose True --cassandra-cluster ${cassandra_Server_IP}
 ./data_provisioning_mme --id 3 --mme-identity ${MME_HOSTNAME}.${REALM} --realm ${REALM} --ue-reachability 1 --truncate False  --verbose True -C ${cassandra_Server_IP}
+./initdb.sh us-west-2
+./provisionusers.sh us-west-2
 ./make_certs.sh ${HSS_HOSTNAME} ${REALM} ${PREFIX}
 popd
 

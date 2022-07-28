@@ -54,6 +54,8 @@ RUN apt-get update && \
       zlib1g-dev \
       libpulse-dev \
       cmake \
+      curl \
+      unzip \
       git \
       python3-cassandra && \
     rm -rf /var/lib/apt/lists/*
@@ -64,11 +66,14 @@ RUN /bin/bash -c "if [[ -v EURECOM_PROXY ]]; then git config --global http.proxy
     git config --global http.sslverify false
 
 
-
 # Copy the workspace as is
 WORKDIR /openair-hss
 COPY . .
 
+
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+    unzip awscliv2.zip && \
+    ./aws/install -i /usr/local/aws-cli -b /usr/local/bin
 
 # Installing and Building HSS
 WORKDIR /openair-hss/scripts

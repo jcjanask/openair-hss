@@ -1,0 +1,76 @@
+{
+    "subscribers": [
+      {
+        "PutRequest": {
+          "Item": {
+            "imsi": {
+              "S": "222010100001126"
+            },
+            "msisdn": {
+              "N": "3019800900"
+            },
+            "key": {
+              "S": "fec86ba6eb707ed08905757b1bb44b8f" 
+            },
+            "opc": {
+              "S": "c42449363bbad02b66d16bc975d77cc1"
+            }
+          }
+        }
+      },
+      {
+        "PutRequest": {
+          "Item": {
+            "imsi": {
+                "S": "222010100001148"
+            },
+              "msisdn": {
+                "N": "3019800901"
+            },
+            "key": {
+                "S": "fec86ba6eb707ed08905757b1bb44b8f" 
+            },
+              "opc": {
+                "S": "c42449363bbad02b66d16bc975d77cc1"
+            }
+          }
+        }
+      },
+      {
+        "PutRequest": {
+          "Item": {
+            "imsi": {
+                "S": "222010100001150"
+            },
+              "msisdn": {
+                "N": "3019800903"
+            },
+            "key": {
+                "S": "fec86ba6eb707ed08905757b1bb44b8f" 
+              },
+              "opc": {
+                "S": "c42449363bbad02b66d16bc975d77cc1"
+              }
+          }
+        }
+      },
+      {
+        "PutRequest": {
+          "Item": {
+            "imsi": {
+                "S": "222010100001153"
+            },
+              "msisdn": {
+                "N": "3019800934"
+            },
+            "key": {
+                "S": "fec86ba6eb707ed08905757b1bb44b8f" 
+              },
+              "opc": {
+                "S": "c42449363bbad02b66d16bc975d77cc1"
+              }
+          }
+        }
+      }
+    ]
+  }

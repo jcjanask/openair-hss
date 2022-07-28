@@ -95,5 +95,6 @@
  ../../src/hss_rel14/hsssec/include/access_restriction.h \
  ../../src/hss_rel14/hsssec/include/aucpp.h \
  ../../src/hss_rel14/include/s6as6d.h \
+ ../../src/hss_rel14/include/provisionusers.h \
  ../../src/hss_rel14/hsssec/include/auc.h \
  ../../src/hss_rel14/hsssec/include/aucpp.h
