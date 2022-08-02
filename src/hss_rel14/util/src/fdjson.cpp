@@ -830,7 +830,9 @@ int fdJsonAddAvps(
   int ret = FDJSON_SUCCESS;
   RAPIDJSON_NAMESPACE::Document doc;
 
+std::cout << json << std::endl;
   if (!json) {
+    std::cout << "lol" << std::endl;
     errfunc(string_format(
                 "%s:%d - ERROR - Error parsing JSON string", __FILE__, __LINE__)
                 .c_str());
@@ -838,6 +840,7 @@ int fdJsonAddAvps(
   }
 
   if (doc.Parse<RAPIDJSON_NAMESPACE::kParseNoFlags>(json).HasParseError()) {
+    std::cout << "loll" << std::endl;
     errfunc(string_format(
                 "%s:%d - ERROR - Error parsing JSON string", __FILE__, __LINE__)
                 .c_str());
@@ -850,6 +853,7 @@ int fdJsonAddAvps(
       fdJsonAddAvp(msg, it->name.GetString(), it->value, errfunc);
     }
   } catch (runtimeError& ex) {
+    std::cout << "eji" << std::endl;
     errfunc(ex.what());
     ret = FDJSON_EXCEPTION;
   }

@@ -66,18 +66,20 @@ class DynamoDb {
    std::string getRegion() { return USER_REGION; }
    bool purgeUe(std::string imsi);
    bool getMmeIdentityFromImsi(std::string imsi);
-   bool getImsiInfo(std::string imsi, DDBImsiInfo& ddbimsi);
+   bool getImsiInfo(std::string imsi, DDBImsiInfo& ddbimsi, void* data);
    void convert_ascii_to_binary(unsigned char* dest, unsigned char* src, int length);
-   bool getImsiSecData(std::string imsi, DDBImsiSec sec);
-   bool updateRandSqn(const std::string& imsi, uint8_t* rand_p, uint8_t* sqn, bool inc_sqn);
-   bool getExtIdsFromImsi(std::string imsi, DDBExtIdList& extids);
+   bool getImsiSecData(std::string imsi, DDBImsiSec& sec, void* data);
+   bool updateRandSqn(const std::string& imsi, uint8_t* rand_p, uint8_t* sqn, bool inc_sqn, void* data);
+   bool getExtIdsFromImsi(std::string imsi, DDBExtIdList& extids, void* data);
    bool getEventIdsFromImsi(std::string imsi, DDBEventIdList& ddbEvtLst);
    bool getImsiInfoData(const Aws::Map<Aws::String, Aws::DynamoDB::Model::AttributeValue>&, 
     DDBImsiInfo& ddbimsi);
-   bool getEventIdsFromMsisdn(int64_t& msisdn, DDBEventIdList& m_ddbEvtIdLst);
-   bool getMmeIdFromHost(std::string mmehost, int32_t& mmeid);
+   bool getEventIdsFromMsisdn(int64_t& msisdn, DDBEventIdList& m_ddbEvtIdLst, void* data);
+   bool getMmeIdFromHost(std::string mmehost, int32_t& mmeid, void* data);
    bool getEventIdsFromExtId(std::string extid, DDBEventIdList& m_ddbEvtIdLst);
    bool getEventIdsFromExtIdData(DDBEventIdList& m_ddbEvtIdLst, Aws::DynamoDB::Model::GetItemOutcome res);
+   bool checkOpcKeys(const uint8_t opP[16]);
+   bool updateOpc(std::string& imsi, std::string& opc);
    Aws::DynamoDB::Model::GetItemOutcome getFromImsi(std::string imsi, Aws::Vector<Aws::String> attributesToGet);   
 
  private:

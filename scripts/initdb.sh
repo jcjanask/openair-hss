@@ -32,3 +32,5 @@ aws dynamodb create-table --region $region --table-name subscribers --attribute-
                 }
             }
             ]"
+
+aws dynamodb wait table-exists --table-name subscribers

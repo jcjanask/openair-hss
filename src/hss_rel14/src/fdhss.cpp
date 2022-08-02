@@ -213,7 +213,7 @@ bool FDHss::init(hss_config_t* hss_config_p) {
 }
 
 void FDHss::updateOpcKeys(const uint8_t opP[16]) {
-  m_dbobj.checkOpcKeys(opP);
+  m_ddb.checkOpcKeys(opP);
 }
 
 void FDHss::shutdown() {

@@ -755,6 +755,7 @@ void PUURreq::processAnswer(FDMessageAnswer& ans) {
 
 // Function invoked when a PUUR Command is received
 int PUURcmd::process(FDMessageRequest* req) {
+  std::cout << "purge?" << std::endl;
   std::string s;
   std::string imsi;
   uint32_t u32;
@@ -1007,27 +1008,26 @@ bool ULRProcessor::phaseReady(int phase, uint32_t adjustment) {
                           "ULRSTATE_PHASE5",
                           "UNKNOWN"};
 #endif
-
   switch (phase) {
     case ULRSTATE_PHASE1: {
       ready = true;
       break;
     }
     case ULRSTATE_PHASE2: {
-      ready = m_dbexecuted & ULRDB_GET_IMSI_INFO;
+      ready = ULRDB_GET_IMSI_INFO;
       break;
     }
     case ULRSTATE_PHASE3: {
       ready = FLAG_IS_SET(m_ulrflags, ULR_SKIP_SUBSCRIBER_DATA) ||
-              (m_dbexecuted & ULRDB_GET_EVNTS_EVNTIDS);
+               ULRDB_GET_EVNTS_EVNTIDS;
       break;
     }
     case ULRSTATE_PHASE4: {
-      ready = m_dbexecuted & ULRDB_GET_MMEID_HOST;
+      ready = ULRDB_GET_MMEID_HOST;
       break;
     }
     case ULRSTATE_PHASE5: {
-      ready = m_dbexecuted & ULRDB_UPDATE_IMSI;
+      ready = ULRDB_UPDATE_IMSI;
       break;
     }
     case ULRSTATE_PHASEFINAL: {
@@ -1071,6 +1071,7 @@ void ULRProcessor::processNextPhase(ULRProcessor* pthis) {
           "%lld,%s,%p,%s\n", STIMER_GET_CURRENT_TIME, __PRETTY_FUNCTION__,
           pthis, phases[pthis->m_nextphase - ULRSTATE_BASE]);
 #endif
+std::cout << pthis->m_nextphase << std::endl;
       switch (pthis->m_nextphase) {
         case ULRSTATE_PHASE1: {
           pthis->phase1();
@@ -1118,12 +1119,12 @@ void ULRProcessor::processNextPhase(ULRProcessor* pthis) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void ULRProcessor::getImsiInfo() {
-  bool success = m_app.dynamodb().getImsiInfo(m_imsi, m_ddborig_info);
+  bool success = m_app.dynamodb().getImsiInfo(m_imsi, m_ddborig_info, new ULRDatabaseAction(ULRDB_GET_IMSI_INFO, *this));
   DB_OP_COMPLETE(ULRDB_GET_IMSI_INFO, m_dbexecuted, m_dbresult, success);
 }
 
 void ULRProcessor::getExternalIds() {
-  bool success = m_app.dynamodb().getExtIdsFromImsi(m_imsi, m_ddbExtIdLst);
+  bool success = m_app.dynamodb().getExtIdsFromImsi(m_imsi, m_ddbExtIdLst, new ULRDatabaseAction(ULRDB_GET_EXT_IDS, *this));
   DB_OP_COMPLETE(ULRDB_GET_EXT_IDS, m_dbexecuted, m_dbresult, success);
 
     atomic_inc_fetch(m_dbissued);
@@ -1312,12 +1313,12 @@ void ULRProcessor::phase1() {
   m_nextphase = ULRSTATE_PHASE2;
 
   result = m_app.dynamodb().getImsiInfo(
-      m_new_info.imsi.c_str(), m_ddborig_info);
+      m_new_info.imsi.c_str(), m_ddborig_info, new ULRDatabaseAction(ULRDB_GET_IMSI_INFO, *this));
 
    if (result) {
     atomic_inc_fetch(m_dbissued);
     result = m_app.dynamodb().getExtIdsFromImsi(
-        m_new_info.imsi.c_str(), m_ddbExtIdLst);
+        m_new_info.imsi.c_str(), m_ddbExtIdLst, new ULRDatabaseAction(ULRDB_GET_EXT_IDS, *this));
     if (!result) {
       DB_OP_COMPLETE(ULRDB_GET_EXT_IDS, m_dbexecuted, m_dbresult, result);
       DB_OP_COMPLETE(
@@ -1332,7 +1333,7 @@ void ULRProcessor::phase1() {
   if (result) {
     atomic_inc_fetch(m_dbissued);
     result = m_app.dynamodb().getEventIdsFromMsisdn(
-        m_new_info.msisdn, m_ddbEvtIdLst);
+        m_new_info.msisdn, m_ddbEvtIdLst, new ULRDatabaseAction(ULRDB_GET_EVNTIDS_MSISDN, *this));
     if (!result) {
       DB_OP_COMPLETE(
           ULRDB_GET_EVNTIDS_MSISDN, m_dbexecuted, m_dbresult, result);
@@ -1344,7 +1345,7 @@ void ULRProcessor::phase1() {
   if (result) {
     atomic_inc_fetch(m_dbissued);
     result = m_app.dynamodb().getMmeIdFromHost(
-        m_new_info.mmehost, m_mmeidentity);
+        m_new_info.mmehost, m_mmeidentity, new ULRDatabaseAction(ULRDB_GET_MMEID_HOST, *this));
     if (!result) {
       DB_OP_COMPLETE(ULRDB_GET_MMEID_HOST, m_dbexecuted, m_dbresult, result);
       atomic_dec_fetch(m_dbissued);
@@ -1368,6 +1369,7 @@ void ULRProcessor::phase1() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void ULRProcessor::phase2() {
+  std::cout << "mwah" << std::endl;
   std::string s;
   uint32_t u32;
 
@@ -1388,7 +1390,7 @@ void ULRProcessor::phase2() {
 
   m_ulr.rat_type.get(u32);
   if (u32 != 1004 ||
-      FLAG_IS_SET(m_orig_info.access_restriction, E_UTRAN_NOT_ALLOWED)) {
+      FLAG_IS_SET(m_ddborig_info.access_restriction, E_UTRAN_NOT_ALLOWED)) {
     m_ans.add(m_dict.avpResultCode(), DIAMETER_ERROR_RAT_NOT_ALLOWED);
     m_ans.send();
     StatsHss::singleton().registerStatResult(
@@ -1427,8 +1429,8 @@ void ULRProcessor::phase2() {
   if (FLAG_IS_SET(u32, ULR_INITIAL_ATTACH_IND)) {
     FLAGS_SET(m_present_flags, MME_IDENTITY_PRESENT);
   } else {
-    if (!m_orig_info.mmehost.empty() && !m_orig_info.mmerealm.empty()) {
-      if (m_orig_info.mmehost != m_new_info.mmehost) {
+    if (!m_ddborig_info.mmehost.empty() && !m_ddborig_info.mmerealm.empty()) {
+      if (m_ddborig_info.mmehost != m_new_info.mmehost) {
         FDAvp er(m_dict.avpExperimentalResult());
         er.add(m_dict.avpVendorId(), VENDOR_3GPP);
         er.add(
@@ -1441,7 +1443,7 @@ void ULRProcessor::phase2() {
         m_nextphase = ULRSTATE_PHASEFINAL;
         return;
       }
-      if (m_orig_info.mmerealm != m_new_info.mmerealm) {
+      if (m_ddborig_info.mmerealm != m_new_info.mmerealm) {
         FDAvp er(m_dict.avpExperimentalResult());
         er.add(m_dict.avpVendorId(), VENDOR_3GPP);
         er.add(
@@ -1557,12 +1559,12 @@ void ULRProcessor::phase2() {
 
   m_ans.add(m_app.getDict().avpUlaFlags(), 1);
 
-  m_ulr.ulr_flags.get(m_ulrflags);
+  bool t  = m_ulr.ulr_flags.get(m_ulrflags);
+  std::cout << t <<"ploke" << std::endl;
   if (!FLAG_IS_SET(m_ulrflags, ULR_SKIP_SUBSCRIBER_DATA)) {
     ULR_TIMER_SET(ulr4, m_perf_timer);
-
     if (fdJsonAddAvps(
-            m_orig_info.subscription_data.c_str(), m_ans.getMsg(),
+            m_ddborig_info.subscription_data.c_str(), m_ans.getMsg(),
             &s6as6d::display_error_message) != 0) {
       FDAvp er(m_dict.avpExperimentalResult());
       er.add(m_dict.avpVendorId(), VENDOR_3GPP);
@@ -1633,7 +1635,7 @@ void ULRProcessor::phase3() {
       // If the plmnid has changed, we check if this has to be reported
       // imsi_original_info.visited_plmnid
 
-      if (m_orig_info.visited_plmnid != m_new_info.visited_plmnid) {
+      if (m_ddborig_info.visited_plmnid != m_new_info.visited_plmnid) {
         for (DAEventList::iterator it_evt = m_evtLst.begin();
              it_evt != m_evtLst.end(); ++it_evt) {
           if ((*it_evt)->monitoring_type == ROAMING_STATUS_EVT) {
@@ -1773,7 +1775,6 @@ void AIRProcessor::on_air_callback(CassFuture* future, void* data) {
       "%lld,%s,%p,%s\n", STIMER_GET_CURRENT_TIME, __PRETTY_FUNCTION__,
       &action->getProcessor(), actions[actionofs]);
 #endif
-
   switch (action->getAction()) {
     case AIRDB_GET_IMSI_SEC: {
       action->getProcessor().getImsiSec();
@@ -1812,7 +1813,7 @@ bool AIRProcessor::phaseReady(int phase, uint32_t adjustment) {
       break;
     }
     case AIRSTATE_PHASE2: {
-      ready = m_dbexecuted & AIRDB_GET_IMSI_SEC;
+      ready = AIRDB_GET_IMSI_SEC;
       break;
     }
     case AIRSTATE_PHASE3: {
@@ -1894,7 +1895,8 @@ void AIRProcessor::processNextPhase(AIRProcessor* pthis) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void AIRProcessor::getImsiSec() {
-  bool success = m_app.dynamodb().getImsiSecData(m_imsi, m_ddbsec);
+ 
+  bool success = m_app.dynamodb().getImsiSecData(m_imsi, m_ddbsec, new AIRDatabaseAction(AIRDB_GET_IMSI_SEC, *this));
   DB_OP_COMPLETE(AIRDB_GET_IMSI_SEC, m_dbexecuted, m_dbresult, success);
 }
 
@@ -1928,7 +1930,6 @@ void AIRProcessor::phase1() {
     m_nextphase = ULRSTATE_PHASEFINAL;
     return;
   }
-
   sscanf(m_imsi.c_str(), "%" SCNu64, &m_uimsi);
 
   bool eutran_avp_found = false;
@@ -1945,7 +1946,6 @@ void AIRProcessor::phase1() {
       return;
     }
   }
-
   if (m_air.requested_eutran_authentication_info.re_synchronization_info.get(
           m_auts, m_auts_len)) {
     eutran_avp_found = true;
@@ -1966,7 +1966,6 @@ void AIRProcessor::phase1() {
       m_nextphase = ULRSTATE_PHASEFINAL;
       return;
     }
-
     if (m_air.requested_utran_geran_authentication_info.re_synchronization_info
             .get(m_auts, m_auts_len)) {
       FDAvp er(m_dict.avpExperimentalResult());
@@ -1978,10 +1977,10 @@ void AIRProcessor::phase1() {
       StatsHss::singleton().registerStatResult(
           stat_hss_air, VENDOR_3GPP, DIAMETER_ERROR_RAT_NOT_ALLOWED);
       m_nextphase = ULRSTATE_PHASEFINAL;
+      Logger::system().startup("e");
       return;
     }
   }
-
   if (m_air.visited_plmn_id.get(m_plmn_id, m_plmn_len)) {
     if (m_plmn_len == 3) {
       if (!Options::getroamallow()) {
@@ -2015,11 +2014,9 @@ void AIRProcessor::phase1() {
     m_nextphase = ULRSTATE_PHASEFINAL;
     return;
   }
-
   m_nextphase = AIRSTATE_PHASE2;
-
   if (m_app.dynamodb().getImsiSecData(
-          m_imsi, m_ddbsec)) {
+          m_imsi, m_ddbsec, new AIRDatabaseAction(AIRDB_GET_IMSI_SEC, *this))) {
     atomic_inc_fetch(m_dbissued);
   } else {
     FDAvp er(m_dict.avpExperimentalResult());
@@ -2033,6 +2030,7 @@ void AIRProcessor::phase1() {
         stat_hss_air, VENDOR_3GPP, DIAMETER_AUTHENTICATION_DATA_UNAVAILABLE);
     m_nextphase = AIRSTATE_PHASEFINAL;
   }
+ 
 }
 
 void AIRProcessor::phase2() {
@@ -2049,7 +2047,6 @@ void AIRProcessor::phase2() {
     m_nextphase = AIRSTATE_PHASEFINAL;
     return;
   }
-
   if (m_auts_set) {
     uint8_t* sqn = sqn_ms_derive_cpp(m_ddbsec.opc, m_ddbsec.key, m_auts, m_ddbsec.rand);
     if (sqn != NULL) {
@@ -2071,9 +2068,13 @@ void AIRProcessor::phase2() {
       std::cerr << "Could not resync " << m_uimsi << std::endl;
     }
   }
-
   for (uint32_t i = 0; i < m_num_vectors; i++) {
     generate_random_cpp(m_vector[i].rand, RAND_LENGTH);
+    std::cout << m_ddbsec.opc << std::endl;
+    std::cout << m_uimsi << std::endl;
+    std::cout << m_ddbsec.key << std::endl;
+    std::cout << m_plmn_id << std::endl;
+    std::cout << m_ddbsec.sqn << std::endl;
     generate_vector_cpp(
         m_ddbsec.opc, m_uimsi, m_ddbsec.key, m_plmn_id, m_ddbsec.sqn, &m_vector[i]);
   }
@@ -2096,7 +2097,6 @@ void AIRProcessor::phase2() {
     authentication_info.add(eurtran_vector);
     m_ans.add(authentication_info);
   }
-
   m_ans.add(m_dict.avpResultCode(), ER_DIAMETER_SUCCESS);
   m_ans.send();
   StatsHss::singleton().registerStatResult(
@@ -2106,7 +2106,8 @@ void AIRProcessor::phase2() {
 
   // combine the rand and sqn updates into a single database update
   if (m_app.dynamodb().updateRandSqn(
-          m_imsi, m_vector[m_num_vectors - 1].rand, m_ddbsec.sqn, true)) {
+          m_imsi, m_vector[m_num_vectors - 1].rand, m_ddbsec.sqn, true, new AIRDatabaseAction(AIRDB_UPDATE_IMSI, *this))) {
+                
     atomic_inc_fetch(m_dbissued);
   } else {
     m_nextphase = AIRSTATE_PHASEFINAL;

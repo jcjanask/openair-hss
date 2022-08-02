@@ -48,7 +48,7 @@ void random_init(void) {
     struct timeval t1;
     gettimeofday(&t1, NULL);
     srand(t1.tv_usec * t1.tv_sec);
-    FPRINTF_DEBUG("Initialized random\n");
+    FPRINTF_DEBUG("Initializedd random\n");
   } else {
     srand(1);
     FPRINTF_DEBUG("Initialized pseudo-random\n");

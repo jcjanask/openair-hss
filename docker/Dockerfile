@@ -26,10 +26,10 @@
 #---------------------------------------------------------------------
 FROM ubuntu:bionic as oai-hss-builder
 
-ARG EURECOM_PROXY
+# ARG EURECOM_PROXY
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=Europe
+ENV TZ=US/Eastern
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get upgrade --yes && \

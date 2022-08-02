@@ -44,7 +44,6 @@
 #include "freeDiameter/freeDiameter-host.h"
 #include "freeDiameter/libfdcore.h"
 #include "freeDiameter/libfdproto.h"
-#include "provisionusers.h"
 
 
 extern "C" {
@@ -176,7 +175,7 @@ int main(int argc, char** argv) {
   /////////////////////////////////////////////////////////////////////////////
 
   initHandler();
-
+  DynamoDb().connect();
   // Fill the hss_config to be used by c sec
   memset(&hss_config, 0, sizeof(hss_config_t));
   Options::fillhssconfig(&hss_config);
