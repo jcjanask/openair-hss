@@ -755,7 +755,6 @@ void PUURreq::processAnswer(FDMessageAnswer& ans) {
 
 // Function invoked when a PUUR Command is received
 int PUURcmd::process(FDMessageRequest* req) {
-  std::cout << "purge?" << std::endl;
   std::string s;
   std::string imsi;
   uint32_t u32;
@@ -1071,7 +1070,6 @@ void ULRProcessor::processNextPhase(ULRProcessor* pthis) {
           "%lld,%s,%p,%s\n", STIMER_GET_CURRENT_TIME, __PRETTY_FUNCTION__,
           pthis, phases[pthis->m_nextphase - ULRSTATE_BASE]);
 #endif
-std::cout << pthis->m_nextphase << std::endl;
       switch (pthis->m_nextphase) {
         case ULRSTATE_PHASE1: {
           pthis->phase1();
@@ -1279,8 +1277,8 @@ void ULRProcessor::phase1() {
   m_ulr.auth_session_state.get(u32);
   m_ans.add(m_app.getDict().avpAuthSessionState(), u32);
 
-  m_ulr.user_name.get(m_new_info.imsi);
-  if (m_new_info.imsi.length() > IMSI_LENGTH) {
+  m_ulr.user_name.get(m_ddbnew_info.imsi);
+  if (m_ddbnew_info.imsi.length() > IMSI_LENGTH) {
     m_ans.add(m_dict.avpResultCode(), ER_DIAMETER_INVALID_AVP_VALUE);
     m_ans.send();
     StatsHss::singleton().registerStatResult(
@@ -1289,13 +1287,13 @@ void ULRProcessor::phase1() {
     return;
   }
 
-  m_ulr.origin_host.get(m_new_info.mmehost);
-  m_ulr.origin_realm.get(m_new_info.mmerealm);
+  m_ulr.origin_host.get(m_ddbnew_info.mmehost);
+  m_ulr.origin_realm.get(m_ddbnew_info.mmerealm);
 
 #ifdef PERFORMANCE_TIMING
   {
     uint64_t uimsi;
-    sscanf(m_new_info.imsi.c_str(), "%" SCNu64, &uimsi);
+    sscanf(m_ddbnew_info.imsi.c_str(), "%" SCNu64, &uimsi);
     m_perf_timer = uimsi - 1014567891234ULL;
     if (m_perf_timer >= 0 && m_perf_timer < MAX_ULR_TIMERS)
       ulrTimers[m_perf_timer].ulr1 = start_timer;
@@ -1313,12 +1311,12 @@ void ULRProcessor::phase1() {
   m_nextphase = ULRSTATE_PHASE2;
 
   result = m_app.dynamodb().getImsiInfo(
-      m_new_info.imsi.c_str(), m_ddborig_info, new ULRDatabaseAction(ULRDB_GET_IMSI_INFO, *this));
+      m_ddbnew_info.imsi.c_str(), m_ddborig_info, new ULRDatabaseAction(ULRDB_GET_IMSI_INFO, *this));
 
    if (result) {
     atomic_inc_fetch(m_dbissued);
     result = m_app.dynamodb().getExtIdsFromImsi(
-        m_new_info.imsi.c_str(), m_ddbExtIdLst, new ULRDatabaseAction(ULRDB_GET_EXT_IDS, *this));
+        m_ddbnew_info.imsi.c_str(), m_ddbExtIdLst, new ULRDatabaseAction(ULRDB_GET_EXT_IDS, *this));
     if (!result) {
       DB_OP_COMPLETE(ULRDB_GET_EXT_IDS, m_dbexecuted, m_dbresult, result);
       DB_OP_COMPLETE(
@@ -1333,7 +1331,7 @@ void ULRProcessor::phase1() {
   if (result) {
     atomic_inc_fetch(m_dbissued);
     result = m_app.dynamodb().getEventIdsFromMsisdn(
-        m_new_info.msisdn, m_ddbEvtIdLst, new ULRDatabaseAction(ULRDB_GET_EVNTIDS_MSISDN, *this));
+        m_ddbnew_info.msisdn, m_ddbEvtIdLst, new ULRDatabaseAction(ULRDB_GET_EVNTIDS_MSISDN, *this));
     if (!result) {
       DB_OP_COMPLETE(
           ULRDB_GET_EVNTIDS_MSISDN, m_dbexecuted, m_dbresult, result);
@@ -1345,7 +1343,7 @@ void ULRProcessor::phase1() {
   if (result) {
     atomic_inc_fetch(m_dbissued);
     result = m_app.dynamodb().getMmeIdFromHost(
-        m_new_info.mmehost, m_mmeidentity, new ULRDatabaseAction(ULRDB_GET_MMEID_HOST, *this));
+        m_ddbnew_info.mmehost, m_mmeidentity, new ULRDatabaseAction(ULRDB_GET_MMEID_HOST, *this));
     if (!result) {
       DB_OP_COMPLETE(ULRDB_GET_MMEID_HOST, m_dbexecuted, m_dbresult, result);
       atomic_dec_fetch(m_dbissued);
@@ -1369,7 +1367,6 @@ void ULRProcessor::phase1() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void ULRProcessor::phase2() {
-  std::cout << "mwah" << std::endl;
   std::string s;
   uint32_t u32;
 
@@ -1385,8 +1382,8 @@ void ULRProcessor::phase2() {
     return;
   }
 
-  m_ulr.origin_host.get(m_new_info.mmehost);
-  m_ulr.origin_realm.get(m_new_info.mmerealm);
+  m_ulr.origin_host.get(m_ddbnew_info.mmehost);
+  m_ulr.origin_realm.get(m_ddbnew_info.mmerealm);
 
   m_ulr.rat_type.get(u32);
   if (u32 != 1004 ||
@@ -1430,7 +1427,7 @@ void ULRProcessor::phase2() {
     FLAGS_SET(m_present_flags, MME_IDENTITY_PRESENT);
   } else {
     if (!m_ddborig_info.mmehost.empty() && !m_ddborig_info.mmerealm.empty()) {
-      if (m_ddborig_info.mmehost != m_new_info.mmehost) {
+      if (m_ddborig_info.mmehost != m_ddbnew_info.mmehost) {
         FDAvp er(m_dict.avpExperimentalResult());
         er.add(m_dict.avpVendorId(), VENDOR_3GPP);
         er.add(
@@ -1443,7 +1440,7 @@ void ULRProcessor::phase2() {
         m_nextphase = ULRSTATE_PHASEFINAL;
         return;
       }
-      if (m_ddborig_info.mmerealm != m_new_info.mmerealm) {
+      if (m_ddborig_info.mmerealm != m_ddbnew_info.mmerealm) {
         FDAvp er(m_dict.avpExperimentalResult());
         er.add(m_dict.avpVendorId(), VENDOR_3GPP);
         er.add(
@@ -1490,7 +1487,7 @@ void ULRProcessor::phase2() {
       return;
     } else {
       // Parse the plmn_id
-      PLMNID_TO_HEX_STR(m_new_info.visited_plmnid, m_plmn_id);
+      PLMNID_TO_HEX_STR(m_ddbnew_info.visited_plmnid, m_plmn_id);
     }
   } else {
     m_ans.add(m_dict.avpResultCode(), ER_DIAMETER_INVALID_AVP_VALUE);
@@ -1501,8 +1498,8 @@ void ULRProcessor::phase2() {
     return;
   }
 
-  if (m_ulr.terminal_information.imei.get(m_new_info.imei)) {
-    if (m_new_info.imei.length() > IMEI_LENGTH) {
+  if (m_ulr.terminal_information.imei.get(m_ddbnew_info.imei)) {
+    if (m_ddbnew_info.imei.length() > IMEI_LENGTH) {
       m_ans.add(m_dict.avpResultCode(), ER_DIAMETER_INVALID_AVP_VALUE);
       m_ans.send();
       StatsHss::singleton().registerStatResult(
@@ -1512,8 +1509,8 @@ void ULRProcessor::phase2() {
     }
     FLAGS_SET(m_present_flags, IMEI_PRESENT);
   }
-  if (m_ulr.terminal_information.software_version.get(m_new_info.imei_sv)) {
-    if (m_new_info.imei_sv.size() != SV_LENGTH) {
+  if (m_ulr.terminal_information.software_version.get(m_ddbnew_info.imei_sv)) {
+    if (m_ddbnew_info.imei_sv.size() != SV_LENGTH) {
       m_ans.add(m_dict.avpResultCode(), ER_DIAMETER_INVALID_AVP_VALUE);
       m_ans.send();
       StatsHss::singleton().registerStatResult(
@@ -1560,7 +1557,6 @@ void ULRProcessor::phase2() {
   m_ans.add(m_app.getDict().avpUlaFlags(), 1);
 
   bool t  = m_ulr.ulr_flags.get(m_ulrflags);
-  std::cout << t <<"ploke" << std::endl;
   if (!FLAG_IS_SET(m_ulrflags, ULR_SKIP_SUBSCRIBER_DATA)) {
     ULR_TIMER_SET(ulr4, m_perf_timer);
     if (fdJsonAddAvps(
@@ -1635,7 +1631,7 @@ void ULRProcessor::phase3() {
       // If the plmnid has changed, we check if this has to be reported
       // imsi_original_info.visited_plmnid
 
-      if (m_ddborig_info.visited_plmnid != m_new_info.visited_plmnid) {
+      if (m_ddborig_info.visited_plmnid != m_ddbnew_info.visited_plmnid) {
         for (DAEventList::iterator it_evt = m_evtLst.begin();
              it_evt != m_evtLst.end(); ++it_evt) {
           if ((*it_evt)->monitoring_type == ROAMING_STATUS_EVT) {
@@ -1703,15 +1699,14 @@ void ULRProcessor::phase4() {
     Logger::s6as6d().warn(
         "The MME host [%s] was not found (even though the DIAMETER connection "
         "was authorized)",
-        m_new_info.mmehost.c_str());
+        m_ddbnew_info.mmehost.c_str());
   }
 
-  m_new_info.mme_id = m_mmeidentity;
+  m_ddbnew_info.mmeid = m_mmeidentity;
 
   atomic_inc_fetch(m_dbissued);
-  bool success = m_app.dataaccess().updateLocation(
-      m_new_info, m_present_flags, m_mmeidentity, on_ulr_callback,
-      new ULRDatabaseAction(ULRDB_UPDATE_IMSI, *this));
+  bool success = m_app.dynamodb().updateLocation(
+      m_ddbnew_info, m_present_flags, m_mmeidentity, new ULRDatabaseAction(ULRDB_UPDATE_IMSI, *this));
   if (!success) {
     DB_OP_COMPLETE(ULRDB_UPDATE_IMSI, m_dbexecuted, m_dbresult, false);
     atomic_dec_fetch(m_dbissued);
@@ -2070,11 +2065,6 @@ void AIRProcessor::phase2() {
   }
   for (uint32_t i = 0; i < m_num_vectors; i++) {
     generate_random_cpp(m_vector[i].rand, RAND_LENGTH);
-    std::cout << m_ddbsec.opc << std::endl;
-    std::cout << m_uimsi << std::endl;
-    std::cout << m_ddbsec.key << std::endl;
-    std::cout << m_plmn_id << std::endl;
-    std::cout << m_ddbsec.sqn << std::endl;
     generate_vector_cpp(
         m_ddbsec.opc, m_uimsi, m_ddbsec.key, m_plmn_id, m_ddbsec.sqn, &m_vector[i]);
   }

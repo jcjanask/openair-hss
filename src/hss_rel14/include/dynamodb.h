@@ -5,6 +5,13 @@
 #include <aws/core/Aws.h>
 #include <aws/dynamodb/DynamoDBClient.h>
 #include <util.h>
+
+#define MME_IDENTITY_PRESENT (1U)
+#define MME_SUPPORTED_FEATURES_PRESENT (1U << 1)
+#define IMEI_PRESENT (1U << 2)
+#define SV_PRESENT (1U << 3)
+#define UE_SRVCC_PRESENT (1U << 4)
+
 #define KEY_LENGTH (16)
 #define SQN_LENGTH (6)
 #define RAND_LENGTH (16)
@@ -78,6 +85,7 @@ class DynamoDb {
    bool getMmeIdFromHost(std::string mmehost, int32_t& mmeid, void* data);
    bool getEventIdsFromExtId(std::string extid, DDBEventIdList& m_ddbEvtIdLst);
    bool getEventIdsFromExtIdData(DDBEventIdList& m_ddbEvtIdLst, Aws::DynamoDB::Model::GetItemOutcome res);
+   bool updateLocation(DDBImsiInfo& location, uint32_t present_flags, int32_t idmmeidentity, void* data);
    bool checkOpcKeys(const uint8_t opP[16]);
    bool updateOpc(std::string& imsi, std::string& opc);
    Aws::DynamoDB::Model::GetItemOutcome getFromImsi(std::string imsi, Aws::Vector<Aws::String> attributesToGet);   

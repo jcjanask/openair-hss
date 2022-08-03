@@ -4,7 +4,7 @@
         "PutRequest": {
           "Item": {
             "imsi": {
-              "S": "222010100001126"
+              "S": "222010100001125"
             },
             "msisdn": {
               "N": "33611123456"
@@ -27,20 +27,14 @@
             "mmerealm": {
               "S": "openairinterface.org"
             },
-            "ms_ps_status": {
-              "S": "ATTACHED"
-            },
             "rand": {
-              "S": "7d796d4281767d530678a13aaad10a4e"
+              "S": "lf436d4281767d530678a13aaad10a4e"
             },
             "sqn": {
               "N": "128"
             },
             "subscription_data": {
               "S": "{\"Subscription-Data\":{\"Access-Restriction-Data\":41,\"Subscriber-Status\":0,\"Network-Access-Mode\":2,\"Regional-Subscription-Zone-Code\":[\"0x0123\",\"0x4567\",\"0x89AB\",\"0xCDEF\",\"0x1234\",\"0x5678\",\"0x9ABC\",\"0xDEF0\",\"0x2345\",\"0x6789\"],\"MSISDN\":\"0x7\",\"AMBR\":{\"Max-Requested-Bandwidth-UL\":20000000,\"Max-Requested-Bandwidth-DL\":40000000},\"APN-Configuration-Profile\":{\"Context-Identifier\":0,\"All-APN-Configurations-Included-Indicator\":0,\"APN-Configuration\":{\"Context-Identifier\":0,\"PDN-Type\":0,\"Service-Selection\":\"oai.ipv4\",\"EPS-Subscribed-QoS-Profile\":{\"QoS-Class-Identifier\":9,\"Allocation-Retention-Priority\":{\"Priority-Level\":15,\"Pre-emption-Capability\":0,\"Pre-emption-Vulnerability\":0}},\"AMBR\":{\"Max-Requested-Bandwidth-UL\":10000000,\"Max-Requested-Bandwidth-DL\":20000000},\"PDN-GW-Allocation-Type\":0,\"MIP6-Agent-Info\":{\"MIP-Home-Agent-Address\":[\"172.26.17.183\"]}},\"APN-Configuration\":{\"Context-Identifier\":1,\"PDN-Type\":0,\"Service-Selection\":\"oai2.ipv4\",\"EPS-Subscribed-QoS-Profile\":{\"QoS-Class-Identifier\":9,\"Allocation-Retention-Priority\":{\"Priority-Level\":13,\"Pre-emption-Capability\":1,\"Pre-emption-Vulnerability\":0}},\"AMBR\":{\"Max-Requested-Bandwidth-UL\":10000000,\"Max-Requested-Bandwidth-DL\":10000000},\"PDN-GW-Allocation-Type\":0,\"MIP6-Agent-Info\":{\"MIP-Home-Agent-Address\":[\"172.26.17.183\"]}}},\"Subscribed-Periodic-RAU-TAU-Timer\":0}}"
-            },
-            "visited_plmnid": {
-              "S": "22F210"
             }
           }
         }
@@ -59,6 +53,27 @@
             },
               "opc": {
                 "S": "c42449363bbad02b66d16bc975d77cc1"
+            },
+            "access_restriction": {
+              "N": "42"
+            },
+            "mmehost": {
+              "S": "mme.amazon.org"
+            },
+            "mmeid": {
+              "N": "3"
+            },
+            "mmerealm": {
+              "S": "amazon.org"
+            },
+            "rand": {
+              "S": "woij44281767d530678a13aaad10a4e"
+            },
+            "sqn": {
+              "N": "128"
+            },
+            "subscription_data": {
+              "S": "{\"Subscription-Data\":{\"Access-Restriction-Data\":42,\"Subscriber-Status\":0,\"Network-Access-Mode\":2,\"Regional-Subscription-Zone-Code\":[\"0x0123\",\"0x4567\",\"0x89AB\",\"0xCDEF\",\"0x1234\",\"0x5678\",\"0x9ABC\",\"0xDEF0\",\"0x2345\",\"0x6789\"],\"MSISDN\":\"0x7\",\"AMBR\":{\"Max-Requested-Bandwidth-UL\":20000000,\"Max-Requested-Bandwidth-DL\":40000000},\"APN-Configuration-Profile\":{\"Context-Identifier\":0,\"All-APN-Configurations-Included-Indicator\":0,\"APN-Configuration\":{\"Context-Identifier\":0,\"PDN-Type\":0,\"Service-Selection\":\"oai.ipv4\",\"EPS-Subscribed-QoS-Profile\":{\"QoS-Class-Identifier\":9,\"Allocation-Retention-Priority\":{\"Priority-Level\":15,\"Pre-emption-Capability\":0,\"Pre-emption-Vulnerability\":0}},\"AMBR\":{\"Max-Requested-Bandwidth-UL\":10000000,\"Max-Requested-Bandwidth-DL\":20000000},\"PDN-GW-Allocation-Type\":0,\"MIP6-Agent-Info\":{\"MIP-Home-Agent-Address\":[\"172.26.17.183\"]}},\"APN-Configuration\":{\"Context-Identifier\":1,\"PDN-Type\":0,\"Service-Selection\":\"oai2.ipv4\",\"EPS-Subscribed-QoS-Profile\":{\"QoS-Class-Identifier\":9,\"Allocation-Retention-Priority\":{\"Priority-Level\":13,\"Pre-emption-Capability\":1,\"Pre-emption-Vulnerability\":0}},\"AMBR\":{\"Max-Requested-Bandwidth-UL\":10000000,\"Max-Requested-Bandwidth-DL\":10000000},\"PDN-GW-Allocation-Type\":0,\"MIP6-Agent-Info\":{\"MIP-Home-Agent-Address\":[\"172.26.17.183\"]}}},\"Subscribed-Periodic-RAU-TAU-Timer\":0}}"
             }
           }
         }
@@ -73,10 +88,31 @@
                 "N": "3019800903"
             },
             "key": {
-                "S": "fec86ba6eb707ed08905757b1bb44b8f" 
+                "S": "p1130da6eb707ed08905757b1bb44b8f" 
               },
               "opc": {
                 "S": "c42449363bbad02b66d16bc975d77cc1"
+              },
+              "access_restriction": {
+                "N": "41"
+              },
+              "mmehost": {
+                "S": "mme.amazon.org"
+              },
+              "mmeid": {
+                "N": "3"
+              },
+              "mmerealm": {
+                "S": "amazon.org"
+              },
+              "rand": {
+                "S": "w02jbfd81767d530678a13aaad10a4e"
+              },
+              "sqn": {
+                "N": "128"
+              },
+              "subscription_data": {
+                "S": "{\"Subscription-Data\":{\"Access-Restriction-Data\":41,\"Subscriber-Status\":0,\"Network-Access-Mode\":2,\"Regional-Subscription-Zone-Code\":[\"0x0123\",\"0x4567\",\"0x89AB\",\"0xCDEF\",\"0x1234\",\"0x5678\",\"0x9ABC\",\"0xDEF0\",\"0x2345\",\"0x6789\"],\"MSISDN\":\"0x7\",\"AMBR\":{\"Max-Requested-Bandwidth-UL\":20000000,\"Max-Requested-Bandwidth-DL\":40000000},\"APN-Configuration-Profile\":{\"Context-Identifier\":0,\"All-APN-Configurations-Included-Indicator\":0,\"APN-Configuration\":{\"Context-Identifier\":0,\"PDN-Type\":0,\"Service-Selection\":\"oai.ipv4\",\"EPS-Subscribed-QoS-Profile\":{\"QoS-Class-Identifier\":9,\"Allocation-Retention-Priority\":{\"Priority-Level\":15,\"Pre-emption-Capability\":0,\"Pre-emption-Vulnerability\":0}},\"AMBR\":{\"Max-Requested-Bandwidth-UL\":10000000,\"Max-Requested-Bandwidth-DL\":20000000},\"PDN-GW-Allocation-Type\":0,\"MIP6-Agent-Info\":{\"MIP-Home-Agent-Address\":[\"172.26.17.183\"]}},\"APN-Configuration\":{\"Context-Identifier\":1,\"PDN-Type\":0,\"Service-Selection\":\"oai2.ipv4\",\"EPS-Subscribed-QoS-Profile\":{\"QoS-Class-Identifier\":9,\"Allocation-Retention-Priority\":{\"Priority-Level\":13,\"Pre-emption-Capability\":1,\"Pre-emption-Vulnerability\":0}},\"AMBR\":{\"Max-Requested-Bandwidth-UL\":10000000,\"Max-Requested-Bandwidth-DL\":10000000},\"PDN-GW-Allocation-Type\":0,\"MIP6-Agent-Info\":{\"MIP-Home-Agent-Address\":[\"172.26.17.183\"]}}},\"Subscribed-Periodic-RAU-TAU-Timer\":0}}"
               }
           }
         }
@@ -91,10 +127,31 @@
                 "N": "3019800934"
             },
             "key": {
-                "S": "fec86ba6eb707ed08905757b1bb44b8f" 
+                "S": "mls8s2a6eb707ed08905757b1bb44b8f" 
               },
               "opc": {
                 "S": "c42449363bbad02b66d16bc975d77cc1"
+              },
+              "access_restriction": {
+                "N": "41"
+              },
+              "mmehost": {
+                "S": "mme.amazon.org"
+              },
+              "mmeid": {
+                "N": "3"
+              },
+              "mmerealm": {
+                "S": "amazon.org"
+              },
+              "rand": {
+                "S": "w02jbfd81767d530678a13aaad10a4e"
+              },
+              "sqn": {
+                "N": "128"
+              },
+              "subscription_data": {
+                "S": "{\"Subscription-Data\":{\"Access-Restriction-Data\":41,\"Subscriber-Status\":0,\"Network-Access-Mode\":2,\"Regional-Subscription-Zone-Code\":[\"0x0123\",\"0x4567\",\"0x89AB\",\"0xCDEF\",\"0x1234\",\"0x5678\",\"0x9ABC\",\"0xDEF0\",\"0x2345\",\"0x6789\"],\"MSISDN\":\"0x7\",\"AMBR\":{\"Max-Requested-Bandwidth-UL\":20000000,\"Max-Requested-Bandwidth-DL\":40000000},\"APN-Configuration-Profile\":{\"Context-Identifier\":0,\"All-APN-Configurations-Included-Indicator\":0,\"APN-Configuration\":{\"Context-Identifier\":0,\"PDN-Type\":0,\"Service-Selection\":\"oai.ipv4\",\"EPS-Subscribed-QoS-Profile\":{\"QoS-Class-Identifier\":9,\"Allocation-Retention-Priority\":{\"Priority-Level\":15,\"Pre-emption-Capability\":0,\"Pre-emption-Vulnerability\":0}},\"AMBR\":{\"Max-Requested-Bandwidth-UL\":10000000,\"Max-Requested-Bandwidth-DL\":20000000},\"PDN-GW-Allocation-Type\":0,\"MIP6-Agent-Info\":{\"MIP-Home-Agent-Address\":[\"172.26.17.183\"]}},\"APN-Configuration\":{\"Context-Identifier\":1,\"PDN-Type\":0,\"Service-Selection\":\"oai2.ipv4\",\"EPS-Subscribed-QoS-Profile\":{\"QoS-Class-Identifier\":9,\"Allocation-Retention-Priority\":{\"Priority-Level\":13,\"Pre-emption-Capability\":1,\"Pre-emption-Vulnerability\":0}},\"AMBR\":{\"Max-Requested-Bandwidth-UL\":10000000,\"Max-Requested-Bandwidth-DL\":10000000},\"PDN-GW-Allocation-Type\":0,\"MIP6-Agent-Info\":{\"MIP-Home-Agent-Address\":[\"172.26.17.183\"]}}},\"Subscribed-Periodic-RAU-TAU-Timer\":0}}"
               }
           }
         }

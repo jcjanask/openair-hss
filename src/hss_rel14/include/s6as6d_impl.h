@@ -223,6 +223,7 @@ class ULRProcessor : public QueueProcessor {
   DAImsiInfo m_orig_info;
   DDBImsiInfo m_ddborig_info;
   DAImsiInfo m_new_info;
+  DDBImsiInfo m_ddbnew_info;
   uint32_t m_present_flags;
   uint8_t m_plmn_id[4];
   size_t m_plmn_len;

@@ -6,6 +6,7 @@
 #include <aws/dynamodb/model/GetItemRequest.h>
 #include <aws/dynamodb/model/ScanRequest.h>
 #include <dataaccess.h>
+#include <common_def.h>
 #include <iostream>
 #include <dynamodb.h>
 #include <string>
@@ -25,9 +26,11 @@ void DynamoDb::connect() {
 }
 
 void DynamoDb::disconnect() {
-  std::cout << "Hi" << std::endl;
+  std::cout << "Shutting Down DynamoDB API gate" << std::endl;
   Aws::ShutdownAPI(options);
 }
+
+
 
 #define KEY_LENGTH (16)
 #define RAND_LENGTH (16)
@@ -132,20 +135,16 @@ bool DynamoDb::checkOpcKeys(const uint8_t opP[16]) {
       res.GetResult().GetItems();
   for (auto& item : items) {
     for (const auto& i : item) {
-      std::cout << i.first << std::endl;
       if (i.first == "key") {
         key = i.second.GetS();
-        std::cout << key << std::endl;
         continue;
       }
       if (i.first == "imsi") {
         imsi = i.second.GetS();
-        std::cout << imsi << std::endl;
         continue;
       }
       if (i.first == "opc") {
         opc = i.second.GetS();
-        std::cout << opc << std::endl;
         continue;
       }
     }
@@ -260,6 +259,76 @@ bool DynamoDb::getImsiInfo(std::string imsi, DDBImsiInfo& ddbimsi, void* data) {
   return false;
 }
 
+bool DynamoDb::updateLocation(
+    DDBImsiInfo& location, uint32_t present_flags, int32_t idmmeidentity, void* data) {
+
+  // Client configs
+  Aws::Client::ClientConfiguration clientConfig;
+  clientConfig.region = "us-west-2";
+  Aws::DynamoDB::DynamoDBClient dynamoClient(clientConfig);
+
+  // *** Define UpdateItem request arguments
+  Aws::DynamoDB::Model::UpdateItemRequest request;
+  // Define TableName argument.
+  request.SetTableName("subscribers");
+
+  // Define KeyName argument.
+  Aws::DynamoDB::Model::AttributeValue attribValue;
+  attribValue.SetS(location.imsi);
+  request.AddKey("imsi", attribValue);
+
+  // Construct the SET update expression argument.
+  Aws::String update_expression("SET");
+
+  if (FLAG_IS_SET(present_flags, IMEI_PRESENT)) {
+    update_expression += " imei= :a,";
+    Aws::DynamoDB::Model::AttributeValue imei;
+    imei.SetS(location.imei);
+    request.AddExpressionAttributeValues(":a", imei);
+  }
+
+  if (FLAG_IS_SET(present_flags, SV_PRESENT)) {
+    update_expression += " imei_sv= :b,";
+    Aws::DynamoDB::Model::AttributeValue imei_sv;
+    imei_sv.SetS(location.imei_sv);
+    request.AddExpressionAttributeValues(":b", imei_sv);
+  }
+
+  if (FLAG_IS_SET(present_flags, MME_IDENTITY_PRESENT)) {
+    update_expression += " mmeid= :c, mmehost= :d, mmerealm= :e,";
+    Aws::DynamoDB::Model::AttributeValue mmeid;
+    mmeid.SetN(std::to_string(location.mmeid));
+    Aws::DynamoDB::Model::AttributeValue mmehost;
+    mmehost.SetS(location.mmehost);
+    Aws::DynamoDB::Model::AttributeValue mmerealm;
+    mmerealm.SetS(location.mmerealm);
+    request.AddExpressionAttributeValues(":c", mmeid);
+    request.AddExpressionAttributeValues(":d", mmehost);
+    request.AddExpressionAttributeValues(":e", mmerealm);
+  }
+
+  update_expression += " ms_ps_status=:f, visited_plmnid= :g";
+  Aws::DynamoDB::Model::AttributeValue ms_ps_status;
+  ms_ps_status.SetS("ATTACHED");
+  request.AddExpressionAttributeValues(":f", ms_ps_status);
+  Aws::DynamoDB::Model::AttributeValue visited_plmnid;
+  visited_plmnid.SetS(location.visited_plmnid);
+  request.AddExpressionAttributeValues(":g", visited_plmnid);
+  std::cout << update_expression << std::endl;
+  request.SetUpdateExpression(update_expression);
+
+
+  // Update the item.
+  const Aws::DynamoDB::Model::UpdateItemOutcome& result = dynamoClient.UpdateItem(request);
+  if (!result.IsSuccess()) {
+    std::cout << result.GetError().GetMessage() << std::endl;
+    return false;
+  } else {
+    std::cout << "Item was updated" << std::endl;
+    return true;
+  }
+}
+
 bool DynamoDb::getImsiSecData(std::string imsi, DDBImsiSec& sec, void* data) {
   Aws::Vector<Aws::String> attributesToGet;
   attributesToGet.push_back(Aws::String("key"));
@@ -320,7 +389,6 @@ bool DynamoDb::updateRandSqn(
 
   std::string rand = Utility::bytes2hex(rand_p, RAND_LENGTH);
 
-  const Aws::String tableName = "subscribers";
   const Aws::String keyValue(imsi);
 
   // Client configs
@@ -426,7 +494,6 @@ bool DynamoDb::getMmeIdFromHost(std::string mmehost, int32_t& m_mmeidentity, voi
         {
         // Output each retrieved field and its value
         for (const auto& i : item) {
-            std::cout << i.first << ": " << i.second.GetN() << std::endl;
             m_mmeidentity = stol(i.second.GetN());
         }
         }
