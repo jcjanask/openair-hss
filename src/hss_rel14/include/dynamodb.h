@@ -30,8 +30,6 @@ class DDBExtIdList : public std::list<std::string> {
   ~DDBExtIdList() {}
 };
 
-
-
 struct DDBImsiInfo {
   std::string imsi;
   std::string mmehost;
@@ -70,13 +68,16 @@ class DynamoDb {
    virtual ~DynamoDb();
    void connect();
    void disconnect();
-   std::string getRegion() { return USER_REGION; }
-   bool purgeUe(std::string imsi);
-   bool getMmeIdentityFromImsi(std::string imsi);
-   bool getImsiInfo(std::string imsi, DDBImsiInfo& ddbimsi, void* data);
+   std::string getRegion() { return USER_REGION; } //need to implement
+
+
+  //=====================AUTHENTICATION
    void convert_ascii_to_binary(unsigned char* dest, unsigned char* src, int length);
    bool getImsiSecData(std::string imsi, DDBImsiSec& sec, void* data);
    bool updateRandSqn(const std::string& imsi, uint8_t* rand_p, uint8_t* sqn, bool inc_sqn, void* data);
+
+   //====================UPDATE LOCATION
+   bool getImsiInfo(std::string imsi, DDBImsiInfo& ddbimsi, void* data);
    bool getExtIdsFromImsi(std::string imsi, DDBExtIdList& extids, void* data);
    bool getEventIdsFromImsi(std::string imsi, DDBEventIdList& ddbEvtLst);
    bool getImsiInfoData(const Aws::Map<Aws::String, Aws::DynamoDB::Model::AttributeValue>&, 
@@ -86,8 +87,14 @@ class DynamoDb {
    bool getEventIdsFromExtId(std::string extid, DDBEventIdList& m_ddbEvtIdLst);
    bool getEventIdsFromExtIdData(DDBEventIdList& m_ddbEvtIdLst, Aws::DynamoDB::Model::GetItemOutcome res);
    bool updateLocation(DDBImsiInfo& location, uint32_t present_flags, int32_t idmmeidentity, void* data);
+
+   //==============================PURGE=======
+   bool purgeUe(std::string imsi);
+   bool getMmeIdentityFromImsi(std::string imsi);
+   //Update OPC
    bool checkOpcKeys(const uint8_t opP[16]);
    bool updateOpc(std::string& imsi, std::string& opc);
+   //Due to many calls based on imsi, just have one method
    Aws::DynamoDB::Model::GetItemOutcome getFromImsi(std::string imsi, Aws::Vector<Aws::String> attributesToGet);   
 
  private:
