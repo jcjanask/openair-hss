@@ -1808,7 +1808,7 @@ bool AIRProcessor::phaseReady(int phase, uint32_t adjustment) {
       break;
     }
     case AIRSTATE_PHASE2: {
-      ready = AIRDB_GET_IMSI_SEC;
+      ready = m_dbexecuted & AIRDB_GET_IMSI_SEC;
       break;
     }
     case AIRSTATE_PHASE3: {
@@ -2012,6 +2012,7 @@ void AIRProcessor::phase1() {
   m_nextphase = AIRSTATE_PHASE2;
   if (m_app.dynamodb().getImsiSecData(
           m_imsi, m_ddbsec, new AIRDatabaseAction(AIRDB_GET_IMSI_SEC, *this))) {
+             DB_OP_COMPLETE(AIRDB_GET_IMSI_SEC, m_dbexecuted, m_dbresult, true);
     atomic_inc_fetch(m_dbissued);
   } else {
     FDAvp er(m_dict.avpExperimentalResult());

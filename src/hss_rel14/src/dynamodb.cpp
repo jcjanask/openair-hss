@@ -61,15 +61,23 @@ DDBEventIdList::~DDBEventIdList() {
 //========================================AUTHENTICATION ============================================================
 
 bool DynamoDb::getImsiSecData(std::string imsi, DDBImsiSec& sec, void* data) {
+  //Specify fields we want to get, add to vector
   Aws::Vector<Aws::String> attributesToGet;
-  attributesToGet.push_back(Aws::String("key"));
+  attributesToGet.push_back(Aws::String("key")); 
   attributesToGet.push_back(Aws::String("sqn"));
   attributesToGet.push_back(Aws::String("rand"));
   attributesToGet.push_back(Aws::String("opc"));
   Aws::DynamoDB::Model::GetItemOutcome res = getFromImsi(imsi, attributesToGet);
 
+
+
   if (!res.IsSuccess()) {
     std::cout << res.GetError().GetMessage() << std::endl;
+    return false;
+  }
+
+  if (res.GetResult().GetItem().size() != 4) {
+    std::cout << "Invalid Get ImsiSec Request" << std::endl;
     return false;
   }
 
